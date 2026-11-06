@@ -12,6 +12,15 @@ function App() {
   const [iniciado, setIniciado] = useState(false);
 
   const terminado = tiempo === 0;
+  let correctos = 0;
+  for (let i = 0; i < escrito.length; i++) {
+    if (escrito[i] === TEXTO[i]) correctos++;
+  }
+
+  const minutos = DURACION / 60;
+  const wpm = Math.round(correctos / 5 / minutos);
+  const precision =
+    escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
   useEffect(() => {
     if (!iniciado || terminado) return;
@@ -52,7 +61,13 @@ function App() {
         onChange={manejarCambio}
         disabled={terminado}
       />
-      {terminado && <p>¡Tiempo!</p>}
+     {terminado && (
+        <div>
+          <p>¡Tiempo!</p>
+          <p>WPM: {wpm}</p>
+          <p>Precisión: {precision}%</p>
+        </div>
+      )}
     </div>
   );
 }
