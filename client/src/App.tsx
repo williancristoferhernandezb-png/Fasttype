@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
+import Login from "./Login";
+import { obtenerNombre, cerrarSesion } from "./api";
 
 const TEXTOS = [
   "el sol sale por la mañana y los pájaros cantan mientras la ciudad despierta poco a poco con el ruido de los autos y las voces de la gente",
@@ -14,7 +16,7 @@ function textoAleatorio() {
   return TEXTOS[Math.floor(Math.random() * TEXTOS.length)];
 }
 
-function App() {
+function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   const [texto, setTexto] = useState(textoAleatorio);
   const [escrito, setEscrito] = useState("");
   const [tiempo, setTiempo] = useState(DURACION);
@@ -61,6 +63,9 @@ function App() {
   return (
     <div>
       <h1>Fasttype</h1>
+       <p>
+        Usuario: {usuario} <button onClick={onSalir}>Salir</button>
+      </p>
       <p className="tiempo">Tiempo: {tiempo}s</p>
       <p className="texto">
         {texto.split("").map((letra, i) => {
@@ -93,6 +98,18 @@ function App() {
       )}
     </div>
   );
+}
+
+function App() {
+  const [usuario, setUsuario] = useState<string | null>(obtenerNombre());
+
+  function salir() {
+    cerrarSesion();
+    setUsuario(null);
+  }
+
+  if (!usuario) return <Login onEntrar={setUsuario} />;
+  return <Test usuario={usuario} onSalir={salir} />;
 }
 
 export default App;
