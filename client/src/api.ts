@@ -37,3 +37,37 @@ export async function entrar(
   localStorage.setItem("nombre", datos.nombre);
   return datos.nombre as string;
 }
+
+export async function guardarResultado(
+  wpm: number,
+  precision: number,
+  segundos: number
+) {
+  const res = await fetch(`${API}/resultados`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${obtenerToken()}`,
+    },
+    body: JSON.stringify({ wpm, precision, segundos }),
+  });
+  if (!res.ok) throw new Error("No se pudo guardar el resultado");
+}
+
+export async function pedirHistorial() {
+  const res = await fetch(`${API}/resultados/historial`, {
+    headers: { Authorization: `Bearer ${obtenerToken()}` },
+  });
+  return (await res.json()) as {
+    id: number;
+    wpm: number;
+    precision: number;
+    segundos: number;
+    creado_en: string;
+  }[];
+}
+
+export async function pedirRanking() {
+  const res = await fetch(`${API}/resultados/ranking`);
+  return (await res.json()) as { nombre: string; mejor_wpm: number }[];
+}

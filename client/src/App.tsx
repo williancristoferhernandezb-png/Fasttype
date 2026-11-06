@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Login from "./Login";
-import { obtenerNombre, cerrarSesion } from "./api";
+import {
+  obtenerNombre,
+  cerrarSesion,
+  guardarResultado,
+  pedirHistorial,
+  pedirRanking,
+} from "./api";
 
 const TEXTOS = [
   "el sol sale por la mañana y los pájaros cantan mientras la ciudad despierta poco a poco con el ruido de los autos y las voces de la gente",
@@ -22,7 +28,22 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   const [tiempo, setTiempo] = useState(DURACION);
   const [iniciado, setIniciado] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [historial, setHistorial] = useState<
+    { id: number; wpm: number; precision: number; creado_en: string }[]
+  >([]);
+  const [ranking, setRanking] = useState<
+    { nombre: string; mejor_wpm: number }[]
+  >([]);
+  const [guardado, setGuardado] = useState(false);
 
+  async function cargarListas() {
+    setHistorial(await pedirHistorial());
+    setRanking(await pedirRanking());
+  }
+
+  useEffect(() => {
+    cargarListas();
+  }, []);
   const textoCompleto = escrito.length === texto.length;
   const terminado = tiempo === 0 || textoCompleto;
 
@@ -42,6 +63,7 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
     setTiempo(DURACION);
     setIniciado(false);
     setTimeout(() => inputRef.current?.focus(), 0);
+    setGuardado(false);
   }
 
   useEffect(() => {
@@ -53,6 +75,14 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
 
     return () => clearInterval(intervalo);
   }, [iniciado, terminado]);
+
+    useEffect(() => {
+    if (!terminado || guardado || escrito.length === 0) return;
+    setGuardado(true);
+    guardarResultado(wpm, precision, segundosUsados)
+      .then(cargarListas)
+      .catch(() => {});
+  }, [terminado]);
 
   function manejarCambio(e: React.ChangeEvent<HTMLInputElement>) {
     if (terminado) return;
@@ -89,13 +119,32 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
         autoFocus
       />
       <button onClick={reiniciar}>Reiniciar</button>
-      {terminado && (
+            {terminado && (
         <div>
           <p>¡Tiempo!</p>
           <p>WPM: {wpm}</p>
           <p>Precisión: {precision}%</p>
         </div>
       )}
+
+      <h3>Tu historial</h3>
+      <ul>
+        {historial.slice(0, 5).map((r) => (
+          <li key={r.id}>
+            {r.wpm} WPM · {r.precision}% ·{" "}
+            {new Date(r.creado_en).toLocaleString()}
+          </li>
+        ))}
+      </ul>
+
+      <h3>Ranking global</h3>
+      <ol>
+        {ranking.map((r) => (
+          <li key={r.nombre}>
+            {r.nombre}: {r.mejor_wpm} WPM
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
