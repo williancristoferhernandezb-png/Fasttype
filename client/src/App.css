@@ -14,3 +14,8 @@
 .incorrecta {
   color: red;
 }
+
+.tiempo {
+  font-size: 28px;
+  font-weight: bold;
+}
