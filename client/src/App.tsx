@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Login from "./Login";
+import Lecciones from "./Lecciones";
 import {
   obtenerNombre,
   cerrarSesion,
@@ -44,6 +45,7 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   useEffect(() => {
     cargarListas();
   }, []);
+
   const textoCompleto = escrito.length === texto.length;
   const terminado = tiempo === 0 || textoCompleto;
 
@@ -62,8 +64,8 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
     setEscrito("");
     setTiempo(DURACION);
     setIniciado(false);
-    setTimeout(() => inputRef.current?.focus(), 0);
     setGuardado(false);
+    setTimeout(() => inputRef.current?.focus(), 0);
   }
 
   useEffect(() => {
@@ -76,7 +78,7 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
     return () => clearInterval(intervalo);
   }, [iniciado, terminado]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!terminado || guardado || escrito.length === 0) return;
     setGuardado(true);
     guardarResultado(wpm, precision, segundosUsados)
@@ -93,10 +95,13 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   return (
     <div>
       <h1>Fasttype</h1>
-       <p>
-        Usuario: {usuario} <button onClick={onSalir}>Salir</button>
-      </p>
-      <p className="tiempo">Tiempo: {tiempo}s</p>
+      <div className="barra">
+        <span>Usuario: {usuario}</span>
+        <button onClick={onSalir}>Salir</button>
+      </div>
+
+      <p className="tiempo">{tiempo}s</p>
+
       <p className="texto">
         {texto.split("").map((letra, i) => {
           let clase = "pendiente";
@@ -110,6 +115,7 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
           );
         })}
       </p>
+
       <input
         ref={inputRef}
         type="text"
@@ -117,40 +123,54 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
         onChange={manejarCambio}
         disabled={terminado}
         autoFocus
+        placeholder="Empieza a escribir aquí..."
       />
-      <button onClick={reiniciar}>Reiniciar</button>
-            {terminado && (
-        <div>
-          <p>¡Tiempo!</p>
-          <p>WPM: {wpm}</p>
-          <p>Precisión: {precision}%</p>
+
+      <div className="acciones">
+        <button onClick={reiniciar}>Reiniciar</button>
+      </div>
+
+      {terminado && (
+        <div className="resultado">
+          <div>
+            <strong>{wpm}</strong>WPM
+          </div>
+          <div>
+            <strong>{precision}%</strong>Precisión
+          </div>
         </div>
       )}
 
-      <h3>Tu historial</h3>
-      <ul>
-        {historial.slice(0, 5).map((r) => (
-          <li key={r.id}>
-            {r.wpm} WPM · {r.precision}% ·{" "}
-            {new Date(r.creado_en).toLocaleString()}
-          </li>
-        ))}
-      </ul>
-
-      <h3>Ranking global</h3>
-      <ol>
-        {ranking.map((r) => (
-          <li key={r.nombre}>
-            {r.nombre}: {r.mejor_wpm} WPM
-          </li>
-        ))}
-      </ol>
+      <div className="paneles">
+        <div className="panel">
+          <h3>Tu historial</h3>
+          <ul>
+            {historial.slice(0, 5).map((r) => (
+              <li key={r.id}>
+                {r.wpm} WPM · {r.precision}% ·{" "}
+                {new Date(r.creado_en).toLocaleDateString()}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="panel">
+          <h3>Ranking global</h3>
+          <ol>
+            {ranking.map((r) => (
+              <li key={r.nombre}>
+                {r.nombre}: {r.mejor_wpm} WPM
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
     </div>
   );
 }
 
 function App() {
   const [usuario, setUsuario] = useState<string | null>(obtenerNombre());
+  const [vista, setVista] = useState<"lecciones" | "libre">("lecciones");
 
   function salir() {
     cerrarSesion();
@@ -158,7 +178,30 @@ function App() {
   }
 
   if (!usuario) return <Login onEntrar={setUsuario} />;
-  return <Test usuario={usuario} onSalir={salir} />;
+
+  return (
+    <div>
+      <nav className="menu">
+        <button
+          className={vista === "lecciones" ? "activo" : ""}
+          onClick={() => setVista("lecciones")}
+        >
+          Lecciones
+        </button>
+        <button
+          className={vista === "libre" ? "activo" : ""}
+          onClick={() => setVista("libre")}
+        >
+          Prueba libre
+        </button>
+      </nav>
+      {vista === "lecciones" ? (
+        <Lecciones usuario={usuario} />
+      ) : (
+        <Test usuario={usuario} onSalir={salir} />
+      )}
+    </div>
+  );
 }
 
 export default App;

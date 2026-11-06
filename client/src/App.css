@@ -1,21 +1,257 @@
-.texto {
-  font-size: 24px;
-  font-family: monospace;
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  color: #9aa0ab;
 }
 
-.pendiente {
-  color: gray;
-}
-
-.correcta {
-  color: green;
-}
-
-.incorrecta {
-  color: red;
+.barra button {
+  padding: 6px 12px;
+  font-size: 14px;
+  background: #2d313a;
+  color: #e6e6e6;
 }
 
 .tiempo {
-  font-size: 28px;
+  text-align: center;
+  font-size: 48px;
   font-weight: bold;
+  margin: 10px 0;
+  color: #f5c542;
+}
+
+.texto {
+  font-size: 24px;
+  line-height: 1.7;
+  font-family: Consolas, monospace;
+  background: #1c1f26;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.pendiente {
+  color: #6b7280;
+}
+
+.correcta {
+  color: #4ade80;
+}
+
+.incorrecta {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.15);
+}
+
+.acciones {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.resultado {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  background: #1c1f26;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.resultado strong {
+  display: block;
+  font-size: 36px;
+  color: #f5c542;
+}
+
+.paneles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.panel {
+  background: #1c1f26;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.panel ul,
+.panel ol {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.8;
+}
+
+@media (max-width: 640px) {
+  .paneles {
+    grid-template-columns: 1fr;
+  }
+  .texto {
+    font-size: 20px;
+  }
+}
+
+.lista-lecciones button {
+  width: 100%;
+}
+
+.etapa {
+  margin: 20px 0 8px;
+  color: #f5c542;
+}
+
+.secundario {
+  background: #2d313a;
+  color: #e6e6e6;
+}
+
+.teclado {
+  background: #1c1f26;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.fila-teclas {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.fila-1 {
+  margin-left: 24px;
+}
+
+.fila-2 {
+  margin-left: 48px;
+}
+
+.tecla {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #242830;
+  border: 2px solid var(--c);
+  color: #e6e6e6;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.tecla.apagada {
+  opacity: 0.3;
+}
+
+.tecla.siguiente {
+  background: var(--c);
+  color: #14161a;
+  transform: scale(1.12);
+}
+
+.tecla.marca::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  width: 12px;
+  height: 2px;
+  background: currentColor;
+}
+
+.espacio {
+  width: 300px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #242830;
+  border: 2px solid var(--c);
+  color: #9aa0ab;
+}
+
+.espacio.siguiente {
+  background: var(--c);
+  color: #14161a;
+}
+
+.manos {
+  width: 100%;
+  max-height: 150px;
+  margin-top: 10px;
+}
+
+.pista {
+  text-align: center;
+  margin: 6px 0 0;
+  color: #9aa0ab;
+}
+
+@media (max-width: 640px) {
+  .tecla {
+    width: 28px;
+    height: 36px;
+    font-size: 13px;
+  }
+  .fila-1 {
+    margin-left: 14px;
+  }
+  .fila-2 {
+    margin-left: 28px;
+  }
+  .espacio {
+    width: 180px;
+  }
+}
+
+.menu {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.menu button {
+  background: #2d313a;
+  color: #e6e6e6;
+}
+
+.menu .activo {
+  background: #f5c542;
+  color: #14161a;
+}
+
+.lista-lecciones {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.lista-lecciones button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  background: #1c1f26;
+  color: #e6e6e6;
+  padding: 16px;
+}
+
+.lista-lecciones button:hover:not(:disabled) {
+  background: #2d313a;
+}
+
+.lista-lecciones .hecha span {
+  color: #4ade80;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
