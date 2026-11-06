@@ -12,6 +12,11 @@ function App() {
   const [iniciado, setIniciado] = useState(false);
 
   const terminado = tiempo === 0;
+    function reiniciar() {
+    setEscrito("");
+    setTiempo(DURACION);
+    setIniciado(false);
+  }
   let correctos = 0;
   for (let i = 0; i < escrito.length; i++) {
     if (escrito[i] === TEXTO[i]) correctos++;
@@ -61,6 +66,7 @@ function App() {
         onChange={manejarCambio}
         disabled={terminado}
       />
+      <button onClick={reiniciar}>Reiniciar</button>
      {terminado && (
         <div>
           <p>¡Tiempo!</p>
