@@ -21,15 +21,16 @@ function App() {
   const [iniciado, setIniciado] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const terminado = tiempo === 0;
+  const textoCompleto = escrito.length === texto.length;
+  const terminado = tiempo === 0 || textoCompleto;
 
   let correctos = 0;
   for (let i = 0; i < escrito.length; i++) {
     if (escrito[i] === texto[i]) correctos++;
   }
 
-  const minutos = DURACION / 60;
-  const wpm = Math.round(correctos / 5 / minutos);
+  const segundosUsados = Math.max(DURACION - tiempo, 1);
+  const wpm = Math.round(correctos / 5 / (segundosUsados / 60));
   const precision =
     escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
