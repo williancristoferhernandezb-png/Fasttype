@@ -255,3 +255,80 @@ button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ───────────── Teclado numérico (Numpad) ───────────── */
+.numpad-zona {
+  --k: 52px;
+  width: calc(var(--k) * 4.3462);
+  margin: 0 auto;
+}
+
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: var(--k);
+  gap: calc(var(--k) * 0.1154);
+}
+
+.numpad .tecla {
+  width: auto;
+  height: auto;
+}
+
+.tecla.decorativa {
+  opacity: 0.35;
+  font-size: 12px;
+  text-transform: none;
+}
+
+.mano-numpad {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.numpad-zona .espacio {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (max-width: 640px) {
+  .numpad-zona {
+    --k: 40px;
+  }
+}
+
+/* ───────────── Pestañas de lecciones ───────────── */
+.pestanas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.pestanas button {
+  background: #2d313a;
+  color: #e6e6e6;
+}
+
+.pestanas button.activa {
+  background: #f5c542;
+  color: #14161a;
+}
+
+.pestanas.variantes button {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* Fila de números sobre la fila Q (solo en lecciones de fila superior) */
+.fila-num {
+  margin-right: 24px;
+}
+
+@media (max-width: 640px) {
+  .fila-num {
+    margin-right: 14px;
+  }
+}

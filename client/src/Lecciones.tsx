@@ -1,19 +1,69 @@
 import { useState, useRef, useEffect } from "react";
-import { LECCIONES } from "./curriculo";
+import { CURSOS, type Modo } from "./curriculo";
 import Teclado from "./Teclado";
 
 const META = 90;
 
-function leerProgreso(usuario: string) {
+type Seccion = "alfa" | "numerica";
+type Variante = "numpad" | "fila";
+
+// La clave de "alfa" es la misma que ya usabas, así no se pierde el progreso.
+const CLAVE_PROGRESO: Record<Modo, string> = {
+  alfa: "progreso2",
+  numpad: "progreso_numpad",
+  fila: "progreso_fila",
+};
+
+const DESCRIPCION: Record<Modo, string> = {
+  alfa: "Letras del teclado: fila base, superior e inferior, palabras y frases.",
+  numpad:
+    "Teclado numérico lateral con la técnica de 5 dedos. Tecla guía: el 5.",
+  fila: "Números del 1 al 0 de la fila superior, con los dedos de ambas manos desde la fila base.",
+};
+
+function leerProgreso(modo: Modo, usuario: string) {
   try {
-    return Number(localStorage.getItem(`progreso2_${usuario}`)) || 0;
+    return (
+      Number(localStorage.getItem(`${CLAVE_PROGRESO[modo]}_${usuario}`)) || 0
+    );
   } catch {
     return 0;
   }
 }
 
+function guardar(clave: string, valor: string) {
+  try {
+    localStorage.setItem(clave, valor);
+  } catch {
+    // si el navegador no deja guardar, seguimos sin guardar
+  }
+}
+
+function leerPreferencia<T extends string>(
+  clave: string,
+  validos: readonly T[],
+  porDefecto: T
+): T {
+  try {
+    const v = localStorage.getItem(clave);
+    return validos.includes(v as T) ? (v as T) : porDefecto;
+  } catch {
+    return porDefecto;
+  }
+}
+
 export default function Lecciones({ usuario }: { usuario: string }) {
-  const [completadas, setCompletadas] = useState(() => leerProgreso(usuario));
+  const [progreso, setProgreso] = useState<Record<Modo, number>>(() => ({
+    alfa: leerProgreso("alfa", usuario),
+    numpad: leerProgreso("numpad", usuario),
+    fila: leerProgreso("fila", usuario),
+  }));
+  const [seccion, setSeccion] = useState<Seccion>(() =>
+    leerPreferencia<Seccion>("seccion_lecciones", ["alfa", "numerica"], "alfa")
+  );
+  const [variante, setVariante] = useState<Variante>(() =>
+    leerPreferencia<Variante>("variante_numerica", ["numpad", "fila"], "numpad")
+  );
   const [actual, setActual] = useState<number | null>(null);
   const [escrito, setEscrito] = useState("");
   const [verTeclado, setVerTeclado] = useState(() => {
@@ -25,7 +75,11 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   });
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const leccion = actual !== null ? LECCIONES[actual] : null;
+  const curso: Modo = seccion === "alfa" ? "alfa" : variante;
+  const lecciones = CURSOS[curso];
+  const completadas = progreso[curso];
+
+  const leccion = actual !== null ? lecciones[actual] : null;
   const terminado = leccion !== null && escrito.length === leccion.texto.length;
 
   let correctos = 0;
@@ -41,23 +95,25 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   useEffect(() => {
     if (!aprobada || actual === null) return;
     if (actual + 1 > completadas) {
-      setCompletadas(actual + 1);
-      try {
-        localStorage.setItem(`progreso2_${usuario}`, String(actual + 1));
-      } catch {
-        // si el navegador no deja guardar, seguimos sin guardar
-      }
+      setProgreso((p) => ({ ...p, [curso]: actual + 1 }));
+      guardar(`${CLAVE_PROGRESO[curso]}_${usuario}`, String(actual + 1));
     }
   }, [aprobada]);
+
+  function elegirSeccion(s: Seccion) {
+    setSeccion(s);
+    guardar("seccion_lecciones", s);
+  }
+
+  function elegirVariante(v: Variante) {
+    setVariante(v);
+    guardar("variante_numerica", v);
+  }
 
   function alternarTeclado() {
     const nuevo = !verTeclado;
     setVerTeclado(nuevo);
-    try {
-      localStorage.setItem("ver_teclado", nuevo ? "si" : "no");
-    } catch {
-      // sin guardado
-    }
+    guardar("ver_teclado", nuevo ? "si" : "no");
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
@@ -72,22 +128,56 @@ export default function Lecciones({ usuario }: { usuario: string }) {
       <div>
         <h1>Fasttype</h1>
         <h2>Lecciones</h2>
+
+        <div className="pestanas">
+          <button
+            className={seccion === "alfa" ? "activa" : ""}
+            onClick={() => elegirSeccion("alfa")}
+          >
+            Lecciones alfanuméricas
+          </button>
+          <button
+            className={seccion === "numerica" ? "activa" : ""}
+            onClick={() => elegirSeccion("numerica")}
+          >
+            Lecciones numéricas
+          </button>
+        </div>
+
+        {seccion === "numerica" && (
+          <div className="pestanas variantes">
+            <button
+              className={variante === "numpad" ? "activa" : ""}
+              onClick={() => elegirVariante("numpad")}
+            >
+              Teclado numérico (Numpad)
+            </button>
+            <button
+              className={variante === "fila" ? "activa" : ""}
+              onClick={() => elegirVariante("fila")}
+            >
+              Fila superior (1 al 0)
+            </button>
+          </div>
+        )}
+
+        <p>{DESCRIPCION[curso]}</p>
         <p>
-          Llevas {completadas} de {LECCIONES.length}. Cada lección se aprueba
+          Llevas {completadas} de {lecciones.length}. Cada lección se aprueba
           con {META}% de precisión o más.
         </p>
         <p>
           <button
-            onClick={() => abrir(Math.min(completadas, LECCIONES.length - 1))}
+            onClick={() => abrir(Math.min(completadas, lecciones.length - 1))}
           >
             Continuar donde voy
           </button>
         </p>
         <div className="lista-lecciones">
-          {LECCIONES.map((l, i) => {
+          {lecciones.map((l, i) => {
             const bloqueada = i > completadas;
             const hecha = i < completadas;
-            const nuevaEtapa = i === 0 || LECCIONES[i - 1].etapa !== l.etapa;
+            const nuevaEtapa = i === 0 || lecciones[i - 1].etapa !== l.etapa;
             return (
               <div key={l.id}>
                 {nuevaEtapa && <h3 className="etapa">{l.etapa}</h3>}
@@ -155,7 +245,13 @@ export default function Lecciones({ usuario }: { usuario: string }) {
         </button>
       </p>
 
-      {verTeclado && <Teclado siguiente={siguiente} activas={activas} />}
+      {verTeclado && (
+        <Teclado
+          siguiente={siguiente}
+          activas={activas}
+          modo={leccion.modo}
+        />
+      )}
 
       {terminado && (
         <div className="resultado">
@@ -172,7 +268,7 @@ export default function Lecciones({ usuario }: { usuario: string }) {
 
       <div className="acciones">
         <button onClick={() => abrir(actual!)}>Repetir</button>{" "}
-        {aprobada && actual! + 1 < LECCIONES.length && (
+        {aprobada && actual! + 1 < lecciones.length && (
           <button onClick={() => abrir(actual! + 1)}>Siguiente</button>
         )}{" "}
         <button className="secundario" onClick={() => setActual(null)}>

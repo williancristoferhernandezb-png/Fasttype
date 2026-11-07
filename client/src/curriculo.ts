@@ -1,17 +1,27 @@
+import { ETAPAS_NUMPAD, ETAPAS_FILA } from "./curriculoNumerico";
+
+// Cada modo es un curso independiente con su propia numeración y progreso:
+// "alfa"   → lecciones alfanuméricas (letras)
+// "numpad" → lecciones numéricas, versión A (teclado numérico lateral)
+// "fila"   → lecciones numéricas, versión B (fila superior 1 al 0)
+export type Modo = "alfa" | "numpad" | "fila";
+
 export interface Leccion {
   id: number;
   etapa: string;
   titulo: string;
   instruccion: string;
   texto: string;
+  modo: Modo;
 }
 
-interface Etapa {
+export interface Etapa {
   nombre: string;
   nuevas: string;
   teclas: string;
   combos: string;
   ayuda: string;
+  etiqueta?: string;
   largas?: boolean;
   palabras?: string[];
   textos?: string[];
@@ -33,7 +43,7 @@ const T_Z = T_X + "z";
 const conSigno = (lista: string[], signo: string) =>
   lista.map((p, i) => (i % 3 === 2 ? p + signo : p));
 
-const ETAPAS: Etapa[] = [
+const ETAPAS_ALFA: Etapa[] = [
   {
     nombre: "F y J",
     nuevas: "fj",
@@ -355,26 +365,33 @@ function validas(palabras: string[], teclas: string) {
   return palabras.filter((p) => [...p].every((c) => teclas.includes(c)));
 }
 
-function construir(): Leccion[] {
+function construir(etapas: Etapa[], modo: Modo): Leccion[] {
   const lista: Leccion[] = [];
   let semilla = 1;
 
   const agregar = (
-    etapa: string,
+    e: Etapa,
     titulo: string,
     instruccion: string,
     texto: string
   ) => {
-    lista.push({ id: lista.length + 1, etapa, titulo, instruccion, texto });
+    lista.push({
+      id: lista.length + 1,
+      etapa: e.nombre,
+      titulo,
+      instruccion,
+      texto,
+      modo,
+    });
   };
 
-  ETAPAS.forEach((e) => {
+  etapas.forEach((e) => {
     const nuevas = [...e.nuevas];
     const combos = [...e.combos];
 
     if (nuevas.length) {
       agregar(
-        e.nombre,
+        e,
         "Conoce las teclas " + nuevas.join(" ").toUpperCase(),
         e.ayuda,
         basico(nuevas)
@@ -389,7 +406,7 @@ function construir(): Leccion[] {
           grupo(combos, nuevas, rnd)
         ).join(" ");
         agregar(
-          e.nombre,
+          e,
           (nuevas.length ? "Combinaciones " : "Repaso ") + (v + 1),
           nuevas.length
             ? "Combina las teclas nuevas. Después de cada tecla, el dedo vuelve a su posición base."
@@ -405,18 +422,25 @@ function construir(): Leccion[] {
       const tam = Math.ceil(pal.length / n);
       for (let i = 0; i < n; i++) {
         agregar(
-          e.nombre,
-          `Palabras ${i + 1}`,
-          "Ahora escribes palabras reales. No mires el teclado.",
+          e,
+          `${e.etiqueta ?? "Palabras"} ${i + 1}`,
+          e.etiqueta
+            ? e.ayuda
+            : "Ahora escribes palabras reales. No mires el teclado.",
           pal.slice(i * tam, (i + 1) * tam).join(" ")
         );
       }
     }
 
-    e.textos?.forEach((t, i) => agregar(e.nombre, `Frase ${i + 1}`, e.ayuda, t));
+    e.textos?.forEach((t, i) =>
+      agregar(e, `${e.etiqueta ?? "Frase"} ${i + 1}`, e.ayuda, t)
+    );
   });
 
   return lista;
 }
-
-export const LECCIONES: Leccion[] = construir();
+export const CURSOS: Record<Modo, Leccion[]> = {
+  alfa: construir(ETAPAS_ALFA, "alfa"),
+  numpad: construir(ETAPAS_NUMPAD, "numpad"),
+  fila: construir(ETAPAS_FILA, "fila"),
+};
