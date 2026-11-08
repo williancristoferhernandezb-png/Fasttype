@@ -35,16 +35,24 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   const [ranking, setRanking] = useState<
     { nombre: string; mejor_wpm: number }[]
   >([]);
-  const [guardado, setGuardado] = useState(false);
+  const guardadoRef = useRef(false);
 
-  async function cargarListas() {
-    setHistorial(await pedirHistorial());
-    setRanking(await pedirRanking());
-  }
+ useEffect(() => {
+  let activo = true;
 
-  useEffect(() => {
-    cargarListas();
-  }, []);
+  Promise.all([pedirHistorial(), pedirRanking()])
+    .then(([datosHistorial, datosRanking]) => {
+      if (!activo) return;
+
+      setHistorial(datosHistorial);
+      setRanking(datosRanking);
+    })
+    .catch(() => {});
+
+  return () => {
+    activo = false;
+  };
+}, []);
 
   const textoCompleto = escrito.length === texto.length;
   const terminado = tiempo === 0 || textoCompleto;
@@ -64,7 +72,7 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
     setEscrito("");
     setTiempo(DURACION);
     setIniciado(false);
-    setGuardado(false);
+    guardadoRef.current = false;
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
@@ -79,12 +87,20 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   }, [iniciado, terminado]);
 
   useEffect(() => {
-    if (!terminado || guardado || escrito.length === 0) return;
-    setGuardado(true);
+    if (!terminado || guardadoRef.current || escrito.length === 0) return;
+
+    guardadoRef.current = true;
+
     guardarResultado(wpm, precision, segundosUsados)
-      .then(cargarListas)
+      .then(() =>
+        Promise.all([pedirHistorial(), pedirRanking()])
+      )
+      .then(([datosHistorial, datosRanking]) => {
+        setHistorial(datosHistorial);
+        setRanking(datosRanking);
+      })
       .catch(() => {});
-  }, [terminado]);
+  }, [terminado, escrito.length, wpm, precision, segundosUsados]);
 
   function manejarCambio(e: React.ChangeEvent<HTMLInputElement>) {
     if (terminado) return;

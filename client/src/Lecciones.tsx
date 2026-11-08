@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { CURSOS, type Modo } from "./curriculo";
 import Teclado from "./Teclado";
 
@@ -92,13 +92,42 @@ export default function Lecciones({ usuario }: { usuario: string }) {
     escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
   const aprobada = terminado && precision >= META;
 
-  useEffect(() => {
-    if (!aprobada || actual === null) return;
-    if (actual + 1 > completadas) {
-      setProgreso((p) => ({ ...p, [curso]: actual + 1 }));
-      guardar(`${CLAVE_PROGRESO[curso]}_${usuario}`, String(actual + 1));
+function manejarEscritura(valor: string) {
+  if (!leccion || terminado) return;
+
+  const nuevoTexto = valor.slice(0, leccion.texto.length);
+  setEscrito(nuevoTexto);
+
+  if (nuevoTexto.length !== leccion.texto.length) return;
+
+  let aciertos = 0;
+
+  for (let i = 0; i < nuevoTexto.length; i++) {
+    if (nuevoTexto[i] === leccion.texto[i]) {
+      aciertos++;
     }
-  }, [aprobada]);
+  }
+
+  const precisionFinal = Math.round(
+    (aciertos / nuevoTexto.length) * 100
+  );
+
+  if (precisionFinal >= META && actual !== null) {
+    const nuevoProgreso = actual + 1;
+
+    if (nuevoProgreso > completadas) {
+      setProgreso((p) => ({
+        ...p,
+        [curso]: Math.max(p[curso], nuevoProgreso),
+      }));
+
+      guardar(
+        `${CLAVE_PROGRESO[curso]}_${usuario}`,
+        String(nuevoProgreso)
+      );
+    }
+  }
+}
 
   function elegirSeccion(s: Seccion) {
     setSeccion(s);
@@ -234,7 +263,7 @@ export default function Lecciones({ usuario }: { usuario: string }) {
         ref={inputRef}
         type="text"
         value={escrito}
-        onChange={(e) => !terminado && setEscrito(e.target.value)}
+        onChange={(e) => manejarEscritura(e.target.value)}
         disabled={terminado}
         placeholder="Escribe aquí..."
       />
