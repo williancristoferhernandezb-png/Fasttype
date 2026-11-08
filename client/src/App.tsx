@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Login from "./Login";
+import Inicio from "./Inicio";
 import Lecciones from "./Lecciones";
 import {
   obtenerNombre,
@@ -16,89 +17,55 @@ const TEXTOS = [
   "cada día que practico escribo un poco más rápido y cometo menos errores porque la constancia es lo que de verdad marca la diferencia",
   "la tecnología avanza muy deprisa y quienes aprenden todos los días encuentran siempre nuevas oportunidades para crecer y mejorar su trabajo",
 ];
-
 const DURACION = 30;
-
 function textoAleatorio() {
   return TEXTOS[Math.floor(Math.random() * TEXTOS.length)];
 }
 
-function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
+function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => void; onInicio: () => void }) {
   const [texto, setTexto] = useState(textoAleatorio);
   const [escrito, setEscrito] = useState("");
   const [tiempo, setTiempo] = useState(DURACION);
   const [iniciado, setIniciado] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [historial, setHistorial] = useState<
-    { id: number; wpm: number; precision: number; creado_en: string }[]
-  >([]);
-  const [ranking, setRanking] = useState<
-    { nombre: string; mejor_wpm: number }[]
-  >([]);
+  const [historial, setHistorial] = useState<{ id: number; wpm: number; precision: number; creado_en: string }[]>([]);
+  const [ranking, setRanking] = useState<{ nombre: string; mejor_wpm: number }[]>([]);
   const guardadoRef = useRef(false);
 
- useEffect(() => {
-  let activo = true;
-
-  Promise.all([pedirHistorial(), pedirRanking()])
-    .then(([datosHistorial, datosRanking]) => {
-      if (!activo) return;
-
-      setHistorial(datosHistorial);
-      setRanking(datosRanking);
-    })
-    .catch(() => {});
-
-  return () => {
-    activo = false;
-  };
-}, []);
+  useEffect(() => {
+    let activo = true;
+    Promise.all([pedirHistorial(), pedirRanking()])
+      .then(([h, r]) => { if (activo) { setHistorial(h); setRanking(r); } })
+      .catch(() => {});
+    return () => { activo = false; };
+  }, []);
 
   const textoCompleto = escrito.length === texto.length;
   const terminado = tiempo === 0 || textoCompleto;
-
   let correctos = 0;
-  for (let i = 0; i < escrito.length; i++) {
-    if (escrito[i] === texto[i]) correctos++;
-  }
-
+  for (let i = 0; i < escrito.length; i++) if (escrito[i] === texto[i]) correctos++;
   const segundosUsados = Math.max(DURACION - tiempo, 1);
   const wpm = Math.round(correctos / 5 / (segundosUsados / 60));
-  const precision =
-    escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
+  const precision = escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
   function reiniciar() {
-    setTexto(textoAleatorio());
-    setEscrito("");
-    setTiempo(DURACION);
-    setIniciado(false);
+    setTexto(textoAleatorio()); setEscrito(""); setTiempo(DURACION); setIniciado(false);
     guardadoRef.current = false;
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
   useEffect(() => {
     if (!iniciado || terminado) return;
-
-    const intervalo = setInterval(() => {
-      setTiempo((t) => t - 1);
-    }, 1000);
-
+    const intervalo = setInterval(() => setTiempo((t) => t - 1), 1000);
     return () => clearInterval(intervalo);
   }, [iniciado, terminado]);
 
   useEffect(() => {
     if (!terminado || guardadoRef.current || escrito.length === 0) return;
-
     guardadoRef.current = true;
-
     guardarResultado(wpm, precision, segundosUsados)
-      .then(() =>
-        Promise.all([pedirHistorial(), pedirRanking()])
-      )
-      .then(([datosHistorial, datosRanking]) => {
-        setHistorial(datosHistorial);
-        setRanking(datosRanking);
-      })
+      .then(() => Promise.all([pedirHistorial(), pedirRanking()]))
+      .then(([h, r]) => { setHistorial(h); setRanking(r); })
       .catch(() => {});
   }, [terminado, escrito.length, wpm, precision, segundosUsados]);
 
@@ -109,115 +76,52 @@ function Test({ usuario, onSalir }: { usuario: string; onSalir: () => void }) {
   }
 
   return (
-    <div>
-      <h1>Fasttype</h1>
-      <div className="barra">
-        <span>Usuario: {usuario}</span>
-        <button onClick={onSalir}>Salir</button>
+    <section className="vista-contenido">
+      <div className="vista-cabecera">
+        <button className="boton-texto" onClick={onInicio}>← INICIO</button>
+        <span className="usuario-chip">{usuario}</span>
+        <button className="boton-salir" onClick={onSalir}>Salir</button>
       </div>
-
+      <h1>PRUEBA <span>LIBRE.</span></h1>
       <p className="tiempo">{tiempo}s</p>
-
-      <p className="texto">
-        {texto.split("").map((letra, i) => {
-          let clase = "pendiente";
-          if (i < escrito.length) {
-            clase = escrito[i] === letra ? "correcta" : "incorrecta";
-          }
-          return (
-            <span key={i} className={clase}>
-              {letra}
-            </span>
-          );
-        })}
-      </p>
-
-      <input
-        ref={inputRef}
-        type="text"
-        value={escrito}
-        onChange={manejarCambio}
-        disabled={terminado}
-        autoFocus
-        placeholder="Empieza a escribir aquí..."
-      />
-
-      <div className="acciones">
-        <button onClick={reiniciar}>Reiniciar</button>
-      </div>
-
-      {terminado && (
-        <div className="resultado">
-          <div>
-            <strong>{wpm}</strong>WPM
-          </div>
-          <div>
-            <strong>{precision}%</strong>Precisión
-          </div>
-        </div>
-      )}
-
+      <p className="texto">{texto.split("").map((letra, i) => {
+        let clase = "pendiente";
+        if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
+        return <span key={i} className={clase}>{letra}</span>;
+      })}</p>
+      <input ref={inputRef} type="text" value={escrito} onChange={manejarCambio} disabled={terminado} autoFocus placeholder="Empieza a escribir aquí..." />
+      <div className="acciones"><button onClick={reiniciar}>Reiniciar prueba</button></div>
+      {terminado && <div className="resultado"><div><strong>{wpm}</strong>WPM</div><div><strong>{precision}%</strong>Precisión</div></div>}
       <div className="paneles">
-        <div className="panel">
-          <h3>Tu historial</h3>
-          <ul>
-            {historial.slice(0, 5).map((r) => (
-              <li key={r.id}>
-                {r.wpm} WPM · {r.precision}% ·{" "}
-                {new Date(r.creado_en).toLocaleDateString()}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="panel">
-          <h3>Ranking global</h3>
-          <ol>
-            {ranking.map((r) => (
-              <li key={r.nombre}>
-                {r.nombre}: {r.mejor_wpm} WPM
-              </li>
-            ))}
-          </ol>
-        </div>
+        <div className="panel"><h3>Tu historial</h3><ul>{historial.slice(0, 5).map((r) => <li key={r.id}>{r.wpm} WPM · {r.precision}% · {new Date(r.creado_en).toLocaleDateString()}</li>)}</ul></div>
+        <div className="panel"><h3>Ranking global</h3><ol>{ranking.map((r) => <li key={r.nombre}>{r.nombre}: {r.mejor_wpm} WPM</li>)}</ol></div>
       </div>
-    </div>
+    </section>
   );
 }
 
 function App() {
   const [usuario, setUsuario] = useState<string | null>(obtenerNombre());
-  const [vista, setVista] = useState<"lecciones" | "libre">("lecciones");
-
-  function salir() {
-    cerrarSesion();
-    setUsuario(null);
-  }
-
+  const [vista, setVista] = useState<"inicio" | "lecciones" | "libre">("inicio");
+  function salir() { cerrarSesion(); setUsuario(null); setVista("inicio"); }
   if (!usuario) return <Login onEntrar={setUsuario} />;
-
   return (
-    <div>
-      <nav className="menu">
-        <button
-          className={vista === "lecciones" ? "activo" : ""}
-          onClick={() => setVista("lecciones")}
-        >
-          Lecciones
-        </button>
-        <button
-          className={vista === "libre" ? "activo" : ""}
-          onClick={() => setVista("libre")}
-        >
-          Prueba libre
-        </button>
-      </nav>
-      {vista === "lecciones" ? (
-        <Lecciones usuario={usuario} />
+    <div className="app-shell">
+      {vista === "inicio" ? (
+        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onSalir={salir} />
+      ) : vista === "lecciones" ? (
+        <section className="vista-contenido">
+          <div className="vista-cabecera">
+            <button className="boton-texto" onClick={() => setVista("inicio")}>← INICIO</button>
+            <span className="usuario-chip">{usuario}</span>
+            <button className="boton-salir" onClick={salir}>Salir</button>
+          </div>
+          <Lecciones usuario={usuario} />
+        </section>
       ) : (
-        <Test usuario={usuario} onSalir={salir} />
+        <Test usuario={usuario} onSalir={salir} onInicio={() => setVista("inicio")} />
       )}
     </div>
   );
 }
-
 export default App;
