@@ -1,62 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
-  font-family: system-ui, Segoe UI, Roboto, sans-serif;
-  color: #e6e6e6;
-  background: #14161a;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #f4f5f7;
+  background: #090b0a;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --verde: #b6ff00;
+  --verde-2: #c8ff00;
+  --violeta: #b000ff;
+  --cian: #00f5ff;
+  --magenta: #ff2bd6;
+  --fondo: #090b0a;
+  --panel: #141915;
+  --borde: rgba(182, 255, 0, .16);
+  --texto-sec: #9ca69d;
 }
-
-* {
-  box-sizing: border-box;
-}
-
+* { box-sizing: border-box; }
+html { min-width: 320px; background: var(--fondo); }
 body {
   margin: 0;
+  min-width: 320px;
   min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 78% 8%, rgba(176, 0, 255, .09), transparent 34%),
+    radial-gradient(ellipse at 12% 55%, rgba(182, 255, 0, .045), transparent 38%),
+    var(--fondo);
 }
-
-#root {
-  max-width: 820px;
-  margin: 0 auto;
-  padding: 24px 16px 60px;
-}
-
-h1 {
-  text-align: center;
-  font-size: 40px;
-  margin: 0 0 8px;
-  color: #f5c542;
-}
-
-h2,
-h3 {
-  margin: 0 0 12px;
-}
-
+button, input { font: inherit; }
+button { cursor: pointer; }
+#root { width: 100%; min-height: 100vh; margin: 0 auto; padding: 0; }
+h1, h2, h3, p { margin-top: 0; }
+h1, h2 { font-family: 'Barlow Condensed', Impact, sans-serif; letter-spacing: .015em; }
 input {
-  width: 100%;
-  padding: 12px 14px;
-  font-size: 18px;
-  border-radius: 8px;
-  border: 2px solid #2d313a;
-  background: #1c1f26;
-  color: #e6e6e6;
-  outline: none;
+  width: 100%; padding: 14px 16px; font-size: 16px; border-radius: 10px;
+  border: 1px solid #343d35; background: #111612; color: #f4f5f7; outline: none;
 }
-
-input:focus {
-  border-color: #f5c542;
-}
-
+input:focus { border-color: var(--verde); box-shadow: 0 0 0 3px rgba(182,255,0,.10); }
 button {
-  padding: 10px 18px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  background: #f5c542;
-  color: #14161a;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 11px 18px; border-radius: 9px; border: 1px solid transparent;
+  background: var(--verde); color: #10140a; font-weight: 800; transition: .2s ease;
 }
-
-button:hover {
-  background: #ffd75e;
-}
+button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+button:disabled { opacity: .42; cursor: not-allowed; transform: none; }
