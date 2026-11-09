@@ -4,7 +4,7 @@ import Login from "./Login";
 import Inicio from "./Inicio";
 import Lecciones from "./Lecciones";
 import {
-  obtenerNombre,
+  obtenerSesion,
   cerrarSesion,
   guardarResultado,
   pedirHistorial,
@@ -101,9 +101,44 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
 }
 
 function App() {
-  const [usuario, setUsuario] = useState<string | null>(obtenerNombre());
+  const [usuario, setUsuario] = useState<string | null>(null);
+  const [comprobandoSesion, setComprobandoSesion] = useState(true);
   const [vista, setVista] = useState<"inicio" | "lecciones" | "libre">("inicio");
-  function salir() { cerrarSesion(); setUsuario(null); setVista("inicio"); }
+
+  useEffect(() => {
+    let activo = true;
+    obtenerSesion()
+      .then((sesion) => {
+        if (activo) setUsuario(sesion?.name ?? null);
+      })
+      .catch((error) => {
+        console.error("No se pudo recuperar la sesión:", error);
+        if (activo) setUsuario(null);
+      })
+      .finally(() => {
+        if (activo) setComprobandoSesion(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
+
+  async function salir() {
+    try {
+      await cerrarSesion();
+    } catch (error) {
+      console.error("Error cerrando sesión:", error);
+    } finally {
+      setUsuario(null);
+      setVista("inicio");
+    }
+  }
+
+  if (comprobandoSesion) {
+    return <div className="auth-loading">FAST<span>TYPE</span><i>_</i></div>;
+  }
+
   if (!usuario) return <Login onEntrar={setUsuario} />;
   return (
     <div className="app-shell">
