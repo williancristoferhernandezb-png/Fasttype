@@ -1,31 +1,43 @@
 import type { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { fromNodeHeaders } from "better-auth/node";
+import { auth } from "./betterAuth";
 
 export interface PeticionAutenticada extends Request {
-  usuario?: { id: number; nombre: string };
+  usuario?: {
+    id: string;
+    nombre: string;
+    email: string;
+  };
 }
 
-export function verificarToken(
+export async function verificarToken(
   req: PeticionAutenticada,
   res: Response,
   next: NextFunction
-) {
-  const cabecera = req.headers.authorization;
-  const token = cabecera?.startsWith("Bearer ") ? cabecera.slice(7) : null;
-
-  if (!token) {
-    res.status(401).json({ error: "Falta el token" });
-    return;
-  }
-
+): Promise<void> {
   try {
-    const datos = jwt.verify(token, process.env.JWT_SECRET as string) as {
-      id: number;
-      nombre: string;
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+
+    if (!session) {
+      res.status(401).json({
+        error: "No has iniciado sesión o tu sesión ha expirado",
+      });
+      return;
+    }
+
+    req.usuario = {
+      id: session.user.id,
+      nombre: session.user.name,
+      email: session.user.email,
     };
-    req.usuario = { id: datos.id, nombre: datos.nombre };
+
     next();
-  } catch {
-    res.status(401).json({ error: "Token inválido o vencido" });
+  } catch (error) {
+    console.error("Error verificando sesión:", error);
+    res.status(500).json({
+      error: "Error al verificar la sesión",
+    });
   }
 }
