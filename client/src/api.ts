@@ -1,41 +1,82 @@
 const API = "http://localhost:3000/api";
 
-export function obtenerToken() {
-  return localStorage.getItem("token");
+type UsuarioAuth = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+async function respuestaAuth<T>(res: Response): Promise<T> {
+  const datos = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(
+      datos.message || datos.error || "No se pudo completar la solicitud"
+    );
+  }
+  return datos as T;
 }
 
-export function obtenerNombre() {
-  return localStorage.getItem("nombre");
-}
-
-export function cerrarSesion() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("nombre");
-}
-
-async function enviar(ruta: string, nombre: string, contrasena: string) {
-  const res = await fetch(`${API}/auth/${ruta}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ nombre, contrasena }),
+export async function obtenerSesion(): Promise<UsuarioAuth | null> {
+  const res = await fetch(`${API}/auth/get-session`, {
+    method: "GET",
+    credentials: "include",
   });
-  const datos = await res.json();
-  if (!res.ok) throw new Error(datos.error ?? "Error desconocido");
-  return datos;
+  const datos = await respuestaAuth<{
+    user?: UsuarioAuth;
+  } | null>(res);
+  return datos?.user ?? null;
 }
 
 export async function entrar(
   modo: "login" | "registro",
   nombre: string,
+  email: string,
   contrasena: string
-) {
-  if (modo === "registro") {
-    await enviar("registro", nombre, contrasena);
+): Promise<string> {
+  const endpoint =
+    modo === "registro" ? "sign-up/email" : "sign-in/email";
+
+  const body =
+    modo === "registro"
+      ? { name: nombre, email, password: contrasena }
+      : { email, password: contrasena };
+
+  const res = await fetch(`${API}/auth/${endpoint}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+
+  const datos = await respuestaAuth<{ user: UsuarioAuth }>(res);
+  return datos.user.name;
+}
+
+export async function entrarConGoogle(): Promise<void> {
+  const res = await fetch(`${API}/auth/sign-in/social`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      provider: "google",
+      callbackURL: window.location.origin,
+    }),
+  });
+
+  const datos = await respuestaAuth<{ url?: string }>(res);
+  if (!datos.url) {
+    throw new Error("Google no devolvió una dirección de autenticación");
   }
-  const datos = await enviar("login", nombre, contrasena);
-  localStorage.setItem("token", datos.token);
-  localStorage.setItem("nombre", datos.nombre);
-  return datos.nombre as string;
+
+  window.location.assign(datos.url);
+}
+
+export async function cerrarSesion(): Promise<void> {
+  const res = await fetch(`${API}/auth/sign-out`, {
+    method: "POST",
+    credentials: "include",
+  });
+  await respuestaAuth(res);
 }
 
 export async function guardarResultado(
@@ -45,29 +86,30 @@ export async function guardarResultado(
 ) {
   const res = await fetch(`${API}/resultados`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${obtenerToken()}`,
-    },
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ wpm, precision, segundos }),
   });
-  if (!res.ok) throw new Error("No se pudo guardar el resultado");
+  await respuestaAuth(res);
 }
 
 export async function pedirHistorial() {
   const res = await fetch(`${API}/resultados/historial`, {
-    headers: { Authorization: `Bearer ${obtenerToken()}` },
+    credentials: "include",
   });
-  return (await res.json()) as {
+  return (await respuestaAuth<{
     id: number;
     wpm: number;
     precision: number;
     segundos: number;
     creado_en: string;
-  }[];
+  }[]>(res));
 }
 
 export async function pedirRanking() {
   const res = await fetch(`${API}/resultados/ranking`);
-  return (await res.json()) as { nombre: string; mejor_wpm: number }[];
+  return await respuestaAuth<{
+    nombre: string;
+    mejor_wpm: number;
+  }[]>(res);
 }
