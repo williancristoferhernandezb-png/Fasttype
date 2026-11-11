@@ -102,26 +102,12 @@ function Manos({ dedo }: { dedo?: string }) {
       <rect x="354" y="150" width="306" height="45" rx="22" fill="#242830" />
       {PARES.map((p) => (
         <g key={p.izq}>
-          <rect
-            x={p.x}
-            y={p.y}
-            width="50"
-            height={195 - p.y}
-            rx="25"
-            fill={color(p.izq)}
-          />
-          <rect
-            x={700 - p.x - 50}
-            y={p.y}
-            width="50"
-            height={195 - p.y}
-            rx="25"
-            fill={color(p.der)}
-          />
+          <rect className={dedo === p.izq ? "dedo-animado" : ""} x={p.x} y={p.y} width="50" height={195 - p.y} rx="25" fill={color(p.izq)} />
+          <rect className={dedo === p.der ? "dedo-animado" : ""} x={700 - p.x - 50} y={p.y} width="50" height={195 - p.y} rx="25" fill={color(p.der)} />
         </g>
       ))}
-      <rect x="290" y="130" width="56" height="65" rx="28" fill={color("pu")} />
-      <rect x="354" y="130" width="56" height="65" rx="28" fill={color("pu")} />
+      <rect className={dedo === "pu" ? "dedo-animado" : ""} x="290" y="130" width="56" height="65" rx="28" fill={color("pu")} />
+      <rect className={dedo === "pu" ? "dedo-animado" : ""} x="354" y="130" width="56" height="65" rx="28" fill={color("pu")} />
     </svg>
   );
 }
@@ -141,17 +127,9 @@ function ManoNumpad({ dedo }: { dedo?: string }) {
     <svg viewBox="0 0 226 150" className="mano-numpad">
       <rect x="0" y="108" width="226" height="40" rx="20" fill="#242830" />
       {dedos.map((d) => (
-        <rect
-          key={d.id}
-          x={x(d.col)}
-          y={d.y}
-          width="44"
-          height={118 - d.y}
-          rx="22"
-          fill={color(d.id)}
-        />
+        <rect className={dedo === d.id ? "dedo-animado" : ""} key={d.id} x={x(d.col)} y={d.y} width="44" height={118 - d.y} rx="22" fill={color(d.id)} />
       ))}
-      <rect x="4" y="112" width="84" height="34" rx="17" fill={color("pd")} />
+      <rect className={dedo === "pd" ? "dedo-animado" : ""} x="4" y="112" width="84" height="34" rx="17" fill={color("pd")} />
     </svg>
   );
 }
