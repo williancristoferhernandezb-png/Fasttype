@@ -1,3 +1,5 @@
+import { authClient } from "./authClient";
+
 const API = "http://localhost:3000/api";
 
 type UsuarioAuth = {
@@ -72,11 +74,10 @@ export async function entrarConGoogle(): Promise<void> {
 }
 
 export async function cerrarSesion(): Promise<void> {
-  const res = await fetch(`${API}/auth/sign-out`, {
-    method: "POST",
-    credentials: "include",
-  });
-  await respuestaAuth(res);
+  const resultado = await authClient.signOut();
+  if (resultado.error) {
+    throw new Error(resultado.error.message || "No se pudo cerrar la sesión");
+  }
 }
 
 export async function guardarResultado(
