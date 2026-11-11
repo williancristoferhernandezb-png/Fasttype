@@ -70,6 +70,10 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
   const inicioRef = useRef<number | null>(null);
   const intentoGuardadoRef = useRef<string>("");
   const [tiempoMs, setTiempoMs] = useState(0);
+  const [teclaReinicio, setTeclaReinicio] = useState<"Tab" | "Control" | "Shift">(() => {
+    const v = localStorage.getItem("fasttype_tecla_reinicio");
+    return v === "Tab" || v === "Control" || v === "Shift" ? v : "Tab";
+  });
 
   const curso: Modo = seccion === "alfa" ? "alfa" : variante;
   const lecciones = CURSOS[curso];
@@ -152,6 +156,27 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
+  function cambiarTeclaReinicio(tecla: "Tab" | "Control" | "Shift") {
+    setTeclaReinicio(tecla);
+    guardar("fasttype_tecla_reinicio", tecla);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  }
+
+  function manejarTeclaEspecial(e: React.KeyboardEvent<HTMLInputElement>) {
+    const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
+      : teclaReinicio === "Shift" ? e.key === "Shift"
+      : e.key === "Control" && !e.altKey && !e.metaKey;
+    if (coincide) {
+      e.preventDefault();
+      abrir(actual!);
+      return;
+    }
+    if (e.key === "Enter" && terminado && aprobada && actual! + 1 < lecciones.length) {
+      e.preventDefault();
+      abrir(actual! + 1);
+    }
+  }
+
   if (leccion === null) {
     return (
       <div className="lecciones-inicio">
@@ -214,7 +239,18 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       <div className="leccion-cabecera">
         <button className="boton-texto" onClick={() => setActual(null)}>← LECCIONES</button>
         <div className="leccion-titulo-control"><strong>{leccion.titulo}</strong><span>LECCIÓN {String(actual! + 1).padStart(2, "0")} / {String(lecciones.length).padStart(2, "0")}</span></div>
-        <div className="leccion-controles"><span className="leccion-cronometro">{tiempoVisible}</span><ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} /><button className="secundario" onClick={() => abrir(actual!)}>↻ Reiniciar</button><button className="secundario" onClick={alternarTeclado}>{verTeclado ? "Ocultar teclado" : "Ver teclado"}</button></div>
+        <div className="leccion-controles">
+          <span className="leccion-cronometro">{tiempoVisible}</span>
+          <ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} />
+          <label className="tecla-reinicio-control" title="Tecla para reiniciar">
+            <span aria-hidden="true">⟲</span>
+            <select value={teclaReinicio} onChange={(e) => cambiarTeclaReinicio(e.target.value as "Tab" | "Control" | "Shift")} aria-label="Tecla para reiniciar" title="Tecla para reiniciar">
+              <option value="Tab">Tab</option><option value="Control">Ctrl</option><option value="Shift">Shift</option>
+            </select>
+          </label>
+          <button className="icono-control" onClick={() => abrir(actual!)} title="Reiniciar lección" aria-label="Reiniciar lección">↻</button>
+          <button className="icono-control" onClick={alternarTeclado} title={verTeclado ? "Ocultar teclado" : "Mostrar teclado"} aria-label={verTeclado ? "Ocultar teclado" : "Mostrar teclado"}>⌨</button>
+        </div>
       </div>
       <div
         className="zona-escritura"
@@ -241,6 +277,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           type="text"
           value={escrito}
           onChange={(e) => manejarEscritura(e.target.value)}
+          onKeyDown={manejarTeclaEspecial}
           onPaste={(e) => e.preventDefault()}
           disabled={terminado}
           autoComplete="off"
