@@ -910,3 +910,56 @@ html, body, #root { min-height: 100%; }
 .vista-lecciones { min-height:0; }
 .leccion-activa .leccion-cabecera .secundario { color:#e7eee7; background:#182019; border-color:#344334; }
 .leccion-activa .leccion-cabecera .secundario:hover { border-color:var(--verde); }
+
+
+/* Personalización de lectura y escritura */
+.preferencias-texto {
+  display:flex; align-items:center; gap:10px; padding:5px 8px;
+  border:1px solid rgba(255,255,255,.09); border-radius:8px;
+  background:rgba(17,23,18,.72);
+}
+.preferencias-texto label { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.preferencias-texto label > span {
+  color:#829087; font-size:8px; font-weight:800; letter-spacing:.12em; white-space:nowrap;
+}
+.preferencias-texto select {
+  max-width:145px; padding:4px 22px 4px 6px; border:0; border-radius:4px;
+  color:#e7eee7; background:#182019; font:500 11px 'Inter',sans-serif; outline:none;
+}
+.preferencias-texto select:focus { box-shadow:0 0 0 1px var(--verde); }
+.preferencias-texto select option { background:#111712; color:#f4f5f7; }
+.preferencias-texto .control-tamano { width:112px; }
+.preferencias-texto input[type="range"] {
+  width:100%; height:4px; min-width:0; padding:0; margin:5px 0;
+  accent-color:var(--verde); border:0; background:#39443a; box-shadow:none;
+}
+.vista-contenido .texto.texto-flotante,
+.leccion-activa .texto.texto-flotante {
+  font-family:var(--font-escritura, 'Inter', sans-serif) !important;
+  font-size:var(--font-size-escritura, 32px) !important;
+}
+.leccion-controles .preferencias-texto { margin:0 3px; }
+@media (max-width:900px) {
+  .preferencias-texto { gap:6px; padding:4px 6px; }
+  .preferencias-texto .control-tamano { width:82px; }
+  .preferencias-texto select { max-width:120px; }
+}
+@media (max-width:640px) {
+  .preferencias-texto { flex-wrap:wrap; }
+  .preferencias-texto .control-tamano { width:90px; }
+}
+
+/* Finger movement: a short press-and-release animation for the finger assigned to the next key */
+.manos .dedo-animado, .mano-numpad .dedo-animado {
+  transform-box:fill-box;
+  transform-origin:50% 100%;
+  animation: dedo-presiona .42s ease-in-out infinite;
+  filter:drop-shadow(0 0 5px currentColor);
+}
+@keyframes dedo-presiona {
+  0%,100% { transform:translateY(0) scaleY(1); }
+  38%,62% { transform:translateY(9px) scaleY(.91); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manos .dedo-animado, .mano-numpad .dedo-animado { animation:none; }
+}
