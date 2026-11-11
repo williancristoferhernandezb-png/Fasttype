@@ -180,7 +180,7 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   const siguiente = terminado ? undefined : leccion.texto[escrito.length];
 
   return (
-    <div className="leccion-activa">
+    <div className="leccion-activa pantalla-entrenamiento">
       <div className="leccion-cabecera">
         <button className="boton-texto" onClick={() => setActual(null)}>← TODAS LAS LECCIONES</button>
         <span className="leccion-indice">LECCIÓN {String(actual! + 1).padStart(2, "0")} / {String(lecciones.length).padStart(2, "0")}</span>
@@ -201,8 +201,8 @@ export default function Lecciones({ usuario }: { usuario: string }) {
             if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
             return (
               <span key={i} className={`caracter-escritura ${clase}`}>
-                {letra === " " ? "\u00a0" : letra}
                 {i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}
+                {letra === " " ? "\u00a0" : letra}
               </span>
             );
           })}
