@@ -974,3 +974,76 @@ html, body, #root { min-height: 100%; }
   .prueba-libre .vista-cabecera .preferencias-texto { order:3; width:100%; justify-content:flex-start; }
   .leccion-controles .preferencias-texto { order:3; }
 }
+
+
+/* Toolbar compacta de lecciones */
+.leccion-activa .leccion-metricas {
+  order:2;
+  position:relative;
+  z-index:2;
+  flex:0 0 auto !important;
+  min-height:26px;
+  visibility:visible !important;
+  opacity:1 !important;
+  overflow:visible;
+}
+.leccion-activa .zona-escritura { order:1; flex:1 1 0; min-height:60px; }
+.leccion-activa > .teclado { order:3; flex:0 1 auto; min-height:0; max-height:36%; overflow:visible; }
+.leccion-activa .leccion-final { order:4; flex:0 0 auto; }
+.leccion-controles { gap:6px; }
+.leccion-controles .preferencias-texto {
+  display:flex; align-items:center; gap:3px; padding:0;
+  border:0; background:transparent;
+}
+.preferencias-texto .preferencia-icono,
+.tecla-reinicio-control {
+  position:relative; display:grid; place-items:center;
+  width:32px; height:32px; border:1px solid rgba(255,255,255,.1);
+  border-radius:7px; background:#151c16; color:#cbd5cc; cursor:pointer;
+}
+.preferencias-texto .preferencia-icono > span,
+.tecla-reinicio-control > span {
+  pointer-events:none; font:600 13px 'Inter',sans-serif;
+}
+.preferencias-texto .preferencia-icono select,
+.tecla-reinicio-control select {
+  position:absolute; inset:0; width:100%; height:100%;
+  opacity:0; cursor:pointer;
+}
+.preferencias-texto .preferencia-icono select option,
+.tecla-reinicio-control select option { background:#111712; color:#f4f5f7; }
+.preferencias-texto .preferencia-tamano { width:38px; }
+.preferencias-texto .preferencia-tamano input[type="range"] {
+  position:absolute; inset:auto 0 -8px; width:100%; height:3px;
+  opacity:0; cursor:pointer;
+}
+.preferencias-texto .preferencia-tamano:focus-within input[type="range"],
+.preferencias-texto .preferencia-tamano:hover input[type="range"] { opacity:1; }
+.tecla-reinicio-control { width:36px; height:32px; }
+.leccion-controles .icono-control {
+  display:grid; place-items:center; width:34px; height:32px; padding:0;
+  border:1px solid rgba(255,255,255,.1); border-radius:7px;
+  color:#dce6dc; background:#151c16; font-size:18px; line-height:1;
+}
+.leccion-controles .icono-control:hover,
+.preferencias-texto .preferencia-icono:hover,
+.tecla-reinicio-control:hover { border-color:var(--verde); color:var(--verde); }
+.leccion-controles .icono-control:focus-visible,
+.preferencias-texto .preferencia-icono:focus-within,
+.tecla-reinicio-control:focus-within { outline:1px solid var(--cian); outline-offset:2px; }
+
+/* Teclado numérico con el mismo paso y separación de un numpad convencional */
+.numpad-zona { --k:46px; width:calc(var(--k) * 4 + 12px); }
+.numpad { grid-template-columns:repeat(4,var(--k)); grid-auto-rows:var(--k); gap:4px; }
+.numpad .tecla { min-width:0; min-height:0; margin:0; }
+.numpad-zona .espacio { margin-top:7px; }
+.leccion-activa .teclado:has(.numpad-zona) { width:min(100%,250px); }
+.leccion-activa .teclado .numpad-zona { margin-left:auto; margin-right:auto; }
+.leccion-activa .teclado .numpad { gap:4px; }
+@media (max-width:640px) {
+  .numpad-zona { --k:40px; width:calc(var(--k) * 4 + 12px); }
+  .leccion-activa .leccion-controles { gap:4px; }
+  .leccion-controles .icono-control { width:30px; height:30px; }
+  .preferencias-texto .preferencia-icono { width:29px; height:30px; }
+  .tecla-reinicio-control { width:32px; height:30px; }
+}
