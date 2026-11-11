@@ -129,7 +129,7 @@ function ManoNumpad({ dedo }: { dedo?: string }) {
       {dedos.map((d) => (
         <rect className={dedo === d.id ? "dedo-animado" : ""} key={d.id} x={x(d.col)} y={d.y} width="44" height={118 - d.y} rx="22" fill={color(d.id)} />
       ))}
-      <rect className={dedo === "pd" ? "dedo-animado" : ""} x="4" y="112" width="84" height="34" rx="17" fill={color("pd")} />
+      <rect className={dedo === "pd" || dedo === "pi" ? "dedo-animado" : ""} x="4" y="112" width="84" height="34" rx="17" fill={color("pd")} />
     </svg>
   );
 }
