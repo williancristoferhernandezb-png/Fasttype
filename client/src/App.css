@@ -900,3 +900,13 @@ html, body, #root { min-height: 100%; }
   .leccion-final { flex-wrap:wrap; gap:8px; }
   .leccion-final-acciones { width:100%; justify-content:center; flex-wrap:wrap; }
 }
+
+
+/* The active lesson is nested inside the app's viewport container: do not give it a second viewport height. */
+.vista-lecciones > .leccion-activa.pantalla-entrenamiento {
+  width:100%; height:auto; min-height:0; max-height:100%;
+  margin:0; padding:0; overflow:hidden; flex:1 1 auto;
+}
+.vista-lecciones { min-height:0; }
+.leccion-activa .leccion-cabecera .secundario { color:#e7eee7; background:#182019; border-color:#344334; }
+.leccion-activa .leccion-cabecera .secundario:hover { border-color:var(--verde); }
