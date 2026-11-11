@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { CURSOS, type Modo } from "./curriculo";
 import Teclado from "./Teclado";
+import ControlesTexto, { estiloEscritura, type FuenteEscritura } from "./ControlesTexto";
 
 const META = 90;
 
@@ -44,7 +45,7 @@ function leerPreferencia<T extends string>(clave: string, validos: readonly T[],
   }
 }
 
-export default function Lecciones({ usuario }: { usuario: string }) {
+export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano }: { usuario: string; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [progreso, setProgreso] = useState<Record<Modo, number>>(() => ({
     alfa: leerProgreso("alfa", usuario),
     numpad: leerProgreso("numpad", usuario),
@@ -209,11 +210,11 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   const wpmActual = segundos > 0 ? Math.round((correctos / 5) / (segundos / 60)) : 0;
 
   return (
-    <div className="leccion-activa pantalla-entrenamiento">
+    <div className="leccion-activa pantalla-entrenamiento" style={estiloEscritura(fuente, tamano)}>
       <div className="leccion-cabecera">
         <button className="boton-texto" onClick={() => setActual(null)}>← LECCIONES</button>
         <div className="leccion-titulo-control"><strong>{leccion.titulo}</strong><span>LECCIÓN {String(actual! + 1).padStart(2, "0")} / {String(lecciones.length).padStart(2, "0")}</span></div>
-        <div className="leccion-controles"><span className="leccion-cronometro">{tiempoVisible}</span><button className="secundario" onClick={() => abrir(actual!)}>↻ Reiniciar</button><button className="secundario" onClick={alternarTeclado}>{verTeclado ? "Ocultar teclado" : "Ver teclado"}</button></div>
+        <div className="leccion-controles"><span className="leccion-cronometro">{tiempoVisible}</span><ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} /><button className="secundario" onClick={() => abrir(actual!)}>↻ Reiniciar</button><button className="secundario" onClick={alternarTeclado}>{verTeclado ? "Ocultar teclado" : "Ver teclado"}</button></div>
       </div>
       <div
         className="zona-escritura"
