@@ -831,3 +831,72 @@ html, body, #root { min-height: 100%; }
   .leccion-activa .teclado { transform: scale(.72); margin-top: -8px; margin-bottom: -20px; }
   .leccion-activa .leccion-cabecera { flex-direction: row; align-items: center; }
 }
+
+
+/* Lesson UI refinement: visible controls, readable typing font and balanced layout */
+.leccion-activa { gap:0; }
+.leccion-activa > .eyebrow,
+.leccion-activa > h1,
+.leccion-activa > .leccion-instruccion,
+.leccion-activa > .acciones { display:none !important; }
+.leccion-activa .leccion-cabecera {
+  display:grid; grid-template-columns:auto minmax(150px,1fr) auto; align-items:center;
+  gap:18px; width:100%; margin:0 0 12px; padding:9px 0 13px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.leccion-titulo-control { min-width:0; display:flex; flex-direction:column; gap:3px; }
+.leccion-titulo-control strong {
+  color:#f4f6f3; font:600 17px/1.2 'Inter',sans-serif;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.leccion-titulo-control span { color:#738078; font-size:9px; font-weight:700; letter-spacing:.13em; }
+.leccion-controles { display:flex; align-items:center; justify-content:flex-end; gap:9px; }
+.leccion-controles button { padding:8px 12px; font-size:11px; border-radius:7px; }
+.leccion-cronometro { min-width:48px; color:var(--cian); font:600 14px 'Inter',sans-serif; font-variant-numeric:tabular-nums; }
+.leccion-activa .zona-escritura {
+  flex:1 1 auto; min-height:80px; max-height:none; height:auto;
+  display:flex; align-items:center; margin:0; padding:14px 0;
+}
+.vista-contenido .texto.texto-flotante {
+  font-family:'Inter',Arial,sans-serif !important;
+  font-size:clamp(25px,2.6vw,34px) !important;
+  font-weight:500 !important; line-height:1.85 !important;
+  letter-spacing:.015em !important; font-variant-ligatures:none;
+}
+.leccion-activa .leccion-metricas {
+  flex:0 0 auto; display:flex; justify-content:center; gap:clamp(16px,4vw,48px);
+  margin:4px 0 10px; color:#7f8b82; font-size:11px;
+}
+.leccion-activa .leccion-metricas strong { color:var(--verde); font-size:14px; font-variant-numeric:tabular-nums; }
+.leccion-activa .teclado {
+  flex:0 0 auto; width:min(760px,100%); max-height:none; overflow:visible;
+  margin:0 auto 4px; padding:8px 12px; transform:none;
+  background:transparent; border:0;
+}
+.leccion-activa .teclado .fila-teclas { gap:5px; margin-bottom:4px; }
+.leccion-activa .teclado .tecla { width:clamp(28px,3.2vw,40px); height:clamp(28px,3.2vw,40px); border-width:1px; border-radius:6px; font-size:13px; }
+.leccion-activa .teclado .manos,.leccion-activa .teclado .mano-numpad { max-height:56px; margin-top:2px; }
+.leccion-activa .teclado .pista { margin:3px 0 0; font-size:10px; }
+.leccion-final {
+  flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:18px;
+  padding:9px 12px; margin:4px 0; color:#aab5aa; font-size:12px;
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.leccion-final > strong { color:var(--verde); font-size:19px; }
+.leccion-final-acciones { display:flex; gap:7px; }
+.leccion-final-acciones button { padding:7px 10px; font-size:10px; }
+@media (max-height:760px) {
+  .leccion-activa .leccion-cabecera { margin-bottom:4px; padding:4px 0 7px; }
+  .leccion-activa .zona-escritura { padding:6px 0; }
+  .leccion-activa .teclado .manos,.leccion-activa .teclado .mano-numpad { max-height:42px; }
+  .leccion-activa .teclado .tecla { height:30px; }
+}
+@media (max-width:700px) {
+  .leccion-activa .leccion-cabecera { grid-template-columns:1fr auto; gap:8px; }
+  .leccion-activa .leccion-cabecera > .boton-texto { grid-column:1/-1; justify-self:start; }
+  .leccion-controles { gap:5px; }
+  .leccion-controles button { padding:7px 8px; font-size:10px; }
+  .leccion-titulo-control strong { font-size:14px; }
+  .leccion-final { flex-wrap:wrap; gap:8px; }
+  .leccion-final-acciones { width:100%; justify-content:center; flex-wrap:wrap; }
+}
