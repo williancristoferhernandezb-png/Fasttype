@@ -1047,3 +1047,78 @@ html, body, #root { min-height: 100%; }
   .preferencias-texto .preferencia-icono { width:29px; height:30px; }
   .tecla-reinicio-control { width:32px; height:30px; }
 }
+
+
+/* Numpad lesson: render the complete keypad, hand guide and spacebar without clipping */
+.leccion-activa > .teclado:has(.numpad-zona) {
+  box-sizing:border-box;
+  flex:0 0 auto !important;
+  width:min(250px,100%);
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  margin:4px auto 8px !important;
+  padding:0 !important;
+  overflow:visible !important;
+  transform:none !important;
+  background:transparent;
+  border:0;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .numpad-zona {
+  --k:42px;
+  box-sizing:border-box;
+  width:calc(var(--k) * 4 + 15px);
+  max-width:100%;
+  margin:0 auto;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .numpad {
+  display:grid;
+  grid-template-columns:repeat(4,var(--k));
+  grid-auto-rows:var(--k);
+  gap:5px;
+  width:100%;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .numpad .tecla {
+  box-sizing:border-box;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:0;
+  font-size:13px;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .mano-numpad {
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:none !important;
+  margin:7px 0 0;
+  overflow:visible;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .espacio {
+  box-sizing:border-box;
+  width:100%;
+  height:32px;
+  min-height:32px;
+  margin:6px 0 0;
+  font-size:11px;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .pista {
+  margin:5px 0 0;
+  line-height:1.25;
+  font-size:10px;
+}
+.leccion-activa > .teclado:has(.numpad-zona) .mano-numpad .dedo-animado {
+  animation:dedo-presiona .42s ease-in-out infinite;
+}
+@media (max-height:760px) {
+  .leccion-activa > .teclado:has(.numpad-zona) { margin:1px auto 3px !important; }
+  .leccion-activa > .teclado:has(.numpad-zona) .numpad-zona { --k:35px; }
+  .leccion-activa > .teclado:has(.numpad-zona) .mano-numpad { width:88%; margin:3px auto 0; }
+  .leccion-activa > .teclado:has(.numpad-zona) .espacio { height:27px; min-height:27px; margin-top:3px; }
+}
+@media (max-width:640px) {
+  .leccion-activa > .teclado:has(.numpad-zona) { width:min(220px,100%); }
+  .leccion-activa > .teclado:has(.numpad-zona) .numpad-zona { --k:36px; width:calc(var(--k) * 4 + 15px); }
+}
