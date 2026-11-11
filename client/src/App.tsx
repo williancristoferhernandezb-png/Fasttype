@@ -173,7 +173,7 @@ function App() {
       {vista === "inicio" ? (
         <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onSalir={salir} />
       ) : vista === "lecciones" ? (
-        <section className="vista-contenido">
+        <section className="vista-contenido pantalla-entrenamiento vista-lecciones">
           <div className="vista-cabecera">
             <button className="boton-texto" onClick={() => setVista("inicio")}>← INICIO</button>
             <span className="usuario-chip">{usuario}</span>
