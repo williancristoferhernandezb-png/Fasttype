@@ -279,7 +279,6 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           onChange={(e) => manejarEscritura(e.target.value)}
           onKeyDown={manejarTeclaEspecial}
           onPaste={(e) => e.preventDefault()}
-          disabled={terminado}
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}
