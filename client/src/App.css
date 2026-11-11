@@ -687,3 +687,147 @@ button:disabled {
   .vista-contenido .texto.texto-flotante { font-size:25px; line-height:1.85; }
   .leccion-cabecera { align-items:flex-start; flex-direction:column; }
 }
+
+
+/* ───────────── Pantalla de entrenamiento compacta ───────────── */
+html, body, #root { min-height: 100%; }
+.app-shell { min-height: 100dvh; }
+.pantalla-entrenamiento {
+  box-sizing: border-box;
+  width: min(1240px, 100%);
+  min-height: calc(100dvh - 76px);
+  height: calc(100dvh - 76px);
+  margin: 0 auto;
+  padding: 12px clamp(18px, 4vw, 54px) 18px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.pantalla-entrenamiento .vista-cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  flex: 0 0 auto;
+  min-height: 42px;
+  margin: 0 0 12px;
+  padding: 7px 0 11px;
+  background: rgba(9,11,10,.96);
+  backdrop-filter: blur(12px);
+}
+.pantalla-entrenamiento h1 {
+  flex: 0 0 auto;
+  margin: 2px 0 4px;
+  font-size: clamp(23px, 3vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+}
+.pantalla-entrenamiento .tiempo {
+  flex: 0 0 auto;
+  margin: 0 0 6px;
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1;
+}
+.pantalla-entrenamiento .zona-escritura {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+  padding: 0;
+  overflow: hidden;
+}
+.pantalla-entrenamiento .texto.texto-flotante {
+  width: 100%;
+  max-height: 100%;
+  padding: 0;
+  margin: 0;
+  font-size: clamp(22px, 2.65vw, 34px);
+  line-height: 1.9;
+  letter-spacing: .045em;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.pantalla-entrenamiento .leccion-metricas {
+  flex: 0 0 auto;
+  margin: 3px 0 8px;
+}
+.pantalla-entrenamiento .acciones {
+  flex: 0 0 auto;
+  margin: 5px 0;
+}
+.pantalla-entrenamiento .resultado {
+  flex: 0 0 auto;
+  margin: 6px 0;
+  padding: 9px 14px;
+}
+.pantalla-entrenamiento .resultado strong { font-size: 25px; }
+
+/* Lecciones: encabezado, texto y teclado distribuidos dentro de una sola pantalla */
+.leccion-activa {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.leccion-activa .leccion-cabecera {
+  flex: 0 0 auto;
+  margin: 0 0 8px;
+}
+.leccion-activa > .eyebrow { flex: 0 0 auto; margin: 2px 0 4px; }
+.leccion-activa .leccion-instruccion {
+  flex: 0 0 auto;
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.leccion-activa .zona-escritura {
+  flex: 1 1 auto;
+  min-height: 70px;
+  max-height: 34%;
+}
+.leccion-activa .teclado {
+  flex: 0 0 auto;
+  width: min(690px, 100%);
+  max-height: 29%;
+  margin: 4px auto;
+  padding: 7px 10px;
+  overflow: hidden;
+  transform: scale(.88);
+  transform-origin: center top;
+}
+.leccion-activa .teclado .manos,
+.leccion-activa .teclado .mano-numpad {
+  max-height: 68px;
+  object-fit: contain;
+  margin-top: 3px;
+}
+.leccion-activa .teclado .pista { font-size: 10px; }
+.leccion-activa .acciones { margin: 4px 0; }
+.leccion-activa .resultado { margin: 4px 0; padding: 8px; }
+
+/* El cursor se dibuja al inicio de la letra que toca, no al final de la anterior */
+.cursor-escritura {
+  left: -3px;
+  right: auto;
+  top: 7%;
+  height: 86%;
+  z-index: 2;
+}
+.cursor-final {
+  left: auto;
+  right: -2px;
+}
+
+@media (max-height: 760px) {
+  .pantalla-entrenamiento { min-height: calc(100dvh - 62px); height: calc(100dvh - 62px); padding-top: 7px; padding-bottom: 8px; }
+  .pantalla-entrenamiento .vista-cabecera { margin-bottom: 6px; padding-bottom: 7px; }
+  .leccion-activa .teclado { transform: scale(.76); margin-top: -3px; margin-bottom: -14px; }
+  .leccion-activa .zona-escritura { max-height: 29%; }
+}
+@media (max-width: 640px) {
+  .pantalla-entrenamiento { padding: 8px 14px 12px; }
+  .pantalla-entrenamiento .texto.texto-flotante { font-size: clamp(19px, 5vw, 25px); line-height: 1.8; }
+  .leccion-activa .teclado { transform: scale(.72); margin-top: -8px; margin-bottom: -20px; }
+  .leccion-activa .leccion-cabecera { flex-direction: row; align-items: center; }
+}
