@@ -76,7 +76,7 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
   }
 
   return (
-    <section className="vista-contenido">
+    <section className="vista-contenido pantalla-entrenamiento prueba-libre">
       <div className="vista-cabecera">
         <button className="boton-texto" onClick={onInicio}>← INICIO</button>
         <span className="usuario-chip">{usuario}</span>
@@ -96,8 +96,8 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
             if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
             return (
               <span key={i} className={`caracter-escritura ${clase}`}>
-                {letra === " " ? "\u00a0" : letra}
                 {i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}
+                {letra === " " ? "\u00a0" : letra}
               </span>
             );
           })}
@@ -120,7 +120,7 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
       </div>
       <div className="acciones"><button onClick={reiniciar}>Reiniciar prueba</button></div>
       {terminado && <div className="resultado"><div><strong>{wpm}</strong>WPM</div><div><strong>{precision}%</strong>Precisión</div></div>}
-      <div className="paneles">
+      <div className="paneles paneles-resultados">
         <div className="panel"><h3>Tu historial</h3><ul>{historial.slice(0, 5).map((r) => <li key={r.id}>{r.wpm} WPM · {r.precision}% · {new Date(r.creado_en).toLocaleDateString()}</li>)}</ul></div>
         <div className="panel"><h3>Ranking global</h3><ol>{ranking.map((r) => <li key={r.nombre}>{r.nombre}: {r.mejor_wpm} WPM</li>)}</ol></div>
       </div>
