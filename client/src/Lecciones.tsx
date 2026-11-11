@@ -91,7 +91,7 @@ export default function Lecciones({ usuario }: { usuario: string }) {
     tick();
     const id = window.setInterval(tick, 200);
     return () => window.clearInterval(id);
-  }, [leccion?.id, terminado]);
+  }, [leccion?.id, terminado, escrito.length > 0]);
 
   useEffect(() => {
     if (!leccion || !terminado || inicioRef.current === null || escrito.length === 0) return;
