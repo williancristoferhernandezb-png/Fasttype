@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { entrar, entrarConGoogle } from "./api";
+import { authClient } from "./authClient";
 
 export default function Login({
   onEntrar,
@@ -12,6 +13,20 @@ export default function Login({
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
+  const oneTapIniciado = useRef(false);
+
+  useEffect(() => {
+    if (oneTapIniciado.current || !import.meta.env.VITE_GOOGLE_CLIENT_ID) return;
+    oneTapIniciado.current = true;
+
+    authClient.oneTap({
+      callbackURL: window.location.origin,
+    }).catch((err) => {
+      // One Tap puede no estar disponible por configuración, navegador
+      // o preferencias del usuario. El botón tradicional sigue disponible.
+      console.info("Google One Tap no pudo mostrarse:", err);
+    });
+  }, []);
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
