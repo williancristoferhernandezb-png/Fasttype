@@ -84,12 +84,40 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
       </div>
       <h1>PRUEBA <span>LIBRE.</span></h1>
       <p className="tiempo">{tiempo}s</p>
-      <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">\n        <p className="texto texto-flotante" aria-label={texto}>{texto.split("").map((letra, i) => {
-        let clase = "pendiente";
-        if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
-        return <span key={i} className={clase}>{letra}</span>;
-      })}</p>
-      <input ref={inputRef} type="text" value={escrito} onChange={manejarCambio} disabled={terminado} autoFocus placeholder="Empieza a escribir aquí..." />
+      <div
+        className="zona-escritura"
+        onClick={() => inputRef.current?.focus()}
+        role="group"
+        aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado."
+      >
+        <p className="texto texto-flotante" aria-label={texto}>
+          {texto.split("").map((letra, i) => {
+            let clase = "pendiente";
+            if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
+            return (
+              <span key={i} className={`caracter-escritura ${clase}`}>
+                {letra === " " ? "\u00a0" : letra}
+                {i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}
+              </span>
+            );
+          })}
+          {escrito.length === texto.length && <span className="cursor-escritura cursor-final" aria-hidden="true" />}
+        </p>
+        <input
+          ref={inputRef}
+          className="input-escritura-invisible"
+          type="text"
+          value={escrito}
+          onChange={manejarCambio}
+          onPaste={(e) => e.preventDefault()}
+          disabled={terminado}
+          autoComplete="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          autoFocus
+          aria-label="Escribe aquí el texto de la prueba libre"
+        />
+      </div>
       <div className="acciones"><button onClick={reiniciar}>Reiniciar prueba</button></div>
       {terminado && <div className="resultado"><div><strong>{wpm}</strong>WPM</div><div><strong>{precision}%</strong>Precisión</div></div>}
       <div className="paneles">
