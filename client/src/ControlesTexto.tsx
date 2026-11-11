@@ -17,15 +17,15 @@ export default function ControlesTexto({
   onTamano: (v: number) => void;
 }) {
   return (
-    <div className="preferencias-texto" aria-label="Preferencias de lectura y escritura">
-      <label>
-        <span>FUENTE</span>
+    <div className="preferencias-texto" aria-label="Preferencias de escritura">
+      <label className="preferencia-icono" title="Tipo de fuente">
+        <span aria-hidden="true">A</span>
         <select value={fuente} onChange={(e) => onFuente(e.target.value as FuenteEscritura)} aria-label="Tipo de fuente">
           {FUENTES.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
         </select>
       </label>
-      <label className="control-tamano">
-        <span>TAMAÑO · {tamano}px</span>
+      <label className="preferencia-icono preferencia-tamano" title={`Tamaño de letra: ${tamano}px`}>
+        <span aria-hidden="true">A↕</span>
         <input type="range" min="20" max="42" step="1" value={tamano} onChange={(e) => onTamano(Number(e.target.value))} aria-label="Tamaño de letra" />
       </label>
     </div>
