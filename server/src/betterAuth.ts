@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { oneTap } from "better-auth/plugins";
 import { pool } from "./db";
 
 export const auth = betterAuth({
@@ -20,4 +21,10 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
+
+  plugins: [
+    oneTap({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+    }),
+  ],
 });
