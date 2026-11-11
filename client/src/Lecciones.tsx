@@ -94,11 +94,13 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   }, [leccion?.id, terminado, escrito.length > 0]);
 
   useEffect(() => {
-    if (!leccion || !terminado || inicioRef.current === null || escrito.length === 0) return;
-    const claveIntento = curso + "-" + leccion.id + "-" + inicioRef.current;
+    const inicio = inicioRef.current;
+    if (!leccion || !terminado || inicio === null || escrito.length === 0) return;
+    const claveIntento = curso + "-" + leccion.id + "-" + inicio;
     if (intentoGuardadoRef.current === claveIntento) return;
     intentoGuardadoRef.current = claveIntento;
-    const duracion = Math.max(1, Date.now() - inicioRef.current);
+    const duracion = Math.max(1, Date.now() - inicio);
+    setTiempoMs(duracion);
     const wpmFinal = Math.round((correctos / 5) / (duracion / 60000));
     const registro = { leccionId: leccion.id, titulo: leccion.titulo, curso, fecha: new Date().toISOString(), duracionMs: duracion, wpm: wpmFinal, precision };
     try {
