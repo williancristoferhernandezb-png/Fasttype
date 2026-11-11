@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { CURSOS, type Modo } from "./curriculo";
 import Teclado from "./Teclado";
 
@@ -66,6 +66,9 @@ export default function Lecciones({ usuario }: { usuario: string }) {
     }
   });
   const inputRef = useRef<HTMLInputElement>(null);
+  const inicioRef = useRef<number | null>(null);
+  const intentoGuardadoRef = useRef<string>("");
+  const [tiempoMs, setTiempoMs] = useState(0);
 
   const curso: Modo = seccion === "alfa" ? "alfa" : variante;
   const lecciones = CURSOS[curso];
@@ -82,26 +85,47 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   const precision = escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
   const aprobada = terminado && precision >= META;
 
+  useEffect(() => {
+    if (!leccion || inicioRef.current === null || terminado) return;
+    const tick = () => setTiempoMs(Date.now() - inicioRef.current!);
+    tick();
+    const id = window.setInterval(tick, 200);
+    return () => window.clearInterval(id);
+  }, [leccion?.id, terminado]);
+
+  useEffect(() => {
+    if (!leccion || !terminado || inicioRef.current === null || escrito.length === 0) return;
+    const claveIntento = curso + "-" + leccion.id + "-" + inicioRef.current;
+    if (intentoGuardadoRef.current === claveIntento) return;
+    intentoGuardadoRef.current = claveIntento;
+    const duracion = Math.max(1, Date.now() - inicioRef.current);
+    const wpmFinal = Math.round((correctos / 5) / (duracion / 60000));
+    const registro = { leccionId: leccion.id, titulo: leccion.titulo, curso, fecha: new Date().toISOString(), duracionMs: duracion, wpm: wpmFinal, precision };
+    try {
+      const key = "fasttype_lecciones_" + usuario;
+      const anteriores = JSON.parse(localStorage.getItem(key) || "[]");
+      anteriores.push(registro);
+      localStorage.setItem(key, JSON.stringify(anteriores.slice(-500)));
+    } catch (error) { console.warn("No se pudo guardar el tiempo de la lección:", error); }
+  }, [terminado, escrito.length]);
+
   function manejarEscritura(valor: string) {
     if (!leccion || terminado) return;
     const nuevoTexto = valor.slice(0, leccion.texto.length);
+    if (nuevoTexto.length > 0 && inicioRef.current === null) inicioRef.current = Date.now();
     setEscrito(nuevoTexto);
     if (nuevoTexto.length !== leccion.texto.length) return;
-
     let aciertos = 0;
-    for (let i = 0; i < nuevoTexto.length; i++) {
-      if (nuevoTexto[i] === leccion.texto[i]) aciertos++;
-    }
+    for (let i = 0; i < nuevoTexto.length; i++) if (nuevoTexto[i] === leccion.texto[i]) aciertos++;
     const precisionFinal = Math.round((aciertos / nuevoTexto.length) * 100);
     if (precisionFinal >= META && actual !== null) {
       const nuevoProgreso = actual + 1;
       if (nuevoProgreso > completadas) {
         setProgreso((p) => ({ ...p, [curso]: Math.max(p[curso], nuevoProgreso) }));
-        guardar(`${CLAVE_PROGRESO[curso]}_${usuario}`, String(nuevoProgreso));
+        guardar(CLAVE_PROGRESO[curso] + "_" + usuario, String(nuevoProgreso));
       }
     }
   }
-
   function elegirSeccion(s: Seccion) {
     setSeccion(s);
     guardar("seccion_lecciones", s);
@@ -120,8 +144,8 @@ export default function Lecciones({ usuario }: { usuario: string }) {
   }
 
   function abrir(indice: number) {
-    setActual(indice);
-    setEscrito("");
+    setActual(indice); setEscrito(""); inicioRef.current = null;
+    intentoGuardadoRef.current = ""; setTiempoMs(0);
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
@@ -178,17 +202,17 @@ export default function Lecciones({ usuario }: { usuario: string }) {
 
   const activas = new Set([...leccion.texto].filter((c) => c !== " "));
   const siguiente = terminado ? undefined : leccion.texto[escrito.length];
+  const segundos = tiempoMs / 1000;
+  const tiempoVisible = Math.floor(segundos / 60) + ":" + String(Math.floor(segundos % 60)).padStart(2, "0");
+  const wpmActual = segundos > 0 ? Math.round((correctos / 5) / (segundos / 60)) : 0;
 
   return (
     <div className="leccion-activa pantalla-entrenamiento">
       <div className="leccion-cabecera">
-        <button className="boton-texto" onClick={() => setActual(null)}>← TODAS LAS LECCIONES</button>
-        <span className="leccion-indice">LECCIÓN {String(actual! + 1).padStart(2, "0")} / {String(lecciones.length).padStart(2, "0")}</span>
+        <button className="boton-texto" onClick={() => setActual(null)}>← LECCIONES</button>
+        <div className="leccion-titulo-control"><strong>{leccion.titulo}</strong><span>LECCIÓN {String(actual! + 1).padStart(2, "0")} / {String(lecciones.length).padStart(2, "0")}</span></div>
+        <div className="leccion-controles"><span className="leccion-cronometro">{tiempoVisible}</span><button className="secundario" onClick={() => abrir(actual!)}>↻ Reiniciar</button><button className="secundario" onClick={alternarTeclado}>{verTeclado ? "Ocultar teclado" : "Ver teclado"}</button></div>
       </div>
-      <p className="eyebrow"><span /> SESIÓN DE PRÁCTICA</p>
-      <h1>{leccion.titulo}</h1>
-      <p className="leccion-instruccion">{leccion.instruccion}</p>
-
       <div
         className="zona-escritura"
         onClick={() => inputRef.current?.focus()}
@@ -223,31 +247,9 @@ export default function Lecciones({ usuario }: { usuario: string }) {
         />
       </div>
 
-      <div className="leccion-metricas">
-        <span><strong>{escrito.length}</strong> / {leccion.texto.length} caracteres</span>
-        <span><strong>{precision}%</strong> precisión</span>
-      </div>
-
-      <p className="acciones">
-        <button className="secundario" onClick={alternarTeclado}>
-          {verTeclado ? "Ocultar teclado y manos" : "Mostrar teclado y manos"}
-        </button>
-      </p>
-
+      <div className="leccion-metricas"><span><strong>{escrito.length}</strong> / {leccion.texto.length}</span><span><strong>{precision}%</strong> precisión</span><span><strong>{wpmActual}</strong> PPM</span><span><strong>{tiempoVisible}</strong> tiempo</span></div>
       {verTeclado && <Teclado siguiente={siguiente} activas={activas} modo={leccion.modo} />}
-
-      {terminado && (
-        <div className="resultado">
-          <div><strong>{precision}%</strong>Precisión</div>
-          <div><strong>{aprobada ? "✔" : "✘"}</strong>{aprobada ? "¡Aprobada!" : `Necesitas ${META}%`}</div>
-        </div>
-      )}
-
-      <div className="acciones">
-        <button onClick={() => abrir(actual!)}>Repetir</button>{" "}
-        {aprobada && actual! + 1 < lecciones.length && <button onClick={() => abrir(actual! + 1)}>Siguiente</button>}{" "}
-        <button className="secundario" onClick={() => setActual(null)}>Volver a lecciones</button>
-      </div>
+      {terminado && <div className="leccion-final"><span>{aprobada ? "Lección completada" : "Sigue practicando"}</span><strong>{wpmActual} PPM</strong><span>{precision}% precisión · {tiempoVisible}</span><div className="leccion-final-acciones"><button onClick={() => abrir(actual!)}>Repetir</button>{aprobada && actual! + 1 < lecciones.length && <button onClick={() => abrir(actual! + 1)}>Siguiente lección</button>}<button className="secundario" onClick={() => setActual(null)}>Volver al curso</button></div></div>}
     </div>
   );
 }
