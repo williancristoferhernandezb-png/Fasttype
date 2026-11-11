@@ -171,9 +171,23 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       abrir(actual!);
       return;
     }
-    if (e.key === "Enter" && terminado && aprobada && actual! + 1 < lecciones.length) {
+
+    // El Enter del bloque numérico suele identificarse como NumpadEnter.
+    // Debe comportarse exactamente igual que el Enter principal.
+    if (e.key === "Enter" || e.code === "NumpadEnter") {
       e.preventDefault();
-      abrir(actual! + 1);
+      if (terminado && aprobada && actual! + 1 < lecciones.length) {
+        abrir(actual! + 1);
+      }
+      return;
+    }
+
+    // Garantiza que Numpad 0 se escriba como el carácter "0".
+    // Nunca debe convertirse en espacio: el espacio solo llega con Space.
+    if (curso === "numpad" && e.code === "Numpad0") {
+      e.preventDefault();
+      if (!terminado) manejarEscritura(escrito + "0");
+      return;
     }
   }
 
