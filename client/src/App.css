@@ -605,3 +605,85 @@ button:disabled {
 @media (max-width: 480px) {
   .auth-card { padding: 28px 22px; }
 }
+
+
+/* ───── Escritura inmersiva: texto flotante y cursor de posición ───── */
+.vista-cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  padding: 13px 0;
+  background: rgba(9, 11, 10, .92);
+  backdrop-filter: blur(14px);
+}
+.zona-escritura {
+  position: relative;
+  margin: 28px 0 18px;
+  padding: 12px 0;
+  cursor: text;
+}
+.vista-contenido .texto.texto-flotante {
+  position: relative;
+  margin: 0;
+  padding: 8px 0 16px;
+  color: #8e9a90;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: 'Barlow Condensed', 'Inter', sans-serif;
+  font-size: clamp(28px, 3.6vw, 39px);
+  font-weight: 600;
+  line-height: 1.75;
+  letter-spacing: .025em;
+  overflow-wrap: anywhere;
+  user-select: none;
+}
+.caracter-escritura { position: relative; }
+.vista-contenido .texto-flotante .pendiente { color: #667269; }
+.vista-contenido .texto-flotante .correcta {
+  color: var(--verde);
+  text-shadow: 0 0 13px rgba(182,255,0,.22);
+}
+.vista-contenido .texto-flotante .incorrecta {
+  color: #ff405f;
+  background: transparent;
+  text-shadow: 0 0 12px rgba(255,64,95,.22);
+}
+.cursor-escritura {
+  position: absolute;
+  top: 5%;
+  right: -2px;
+  width: 2px;
+  height: 90%;
+  border-radius: 2px;
+  background: var(--cian);
+  box-shadow: 0 0 9px var(--cian), 0 0 18px rgba(0,245,255,.55);
+  animation: cursor-pulso 1s steps(2, start) infinite;
+}
+.cursor-final { position: relative; display: inline-block; vertical-align: text-bottom; margin-left: 2px; }
+.input-escritura-invisible {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 1px;
+  padding: 0 !important;
+  margin: 0;
+  opacity: 0;
+  border: 0 !important;
+  pointer-events: none;
+}
+.zona-escritura:focus-within .texto-flotante { text-shadow: 0 0 25px rgba(182,255,0,.035); }
+.leccion-cabecera { display:flex; justify-content:space-between; align-items:center; gap:12px; margin: 8px 0 26px; }
+.leccion-indice { color:var(--cian); font-size:10px; font-weight:800; letter-spacing:.14em; }
+.leccion-instruccion,.lecciones-descripcion { color:#9ca69d; line-height:1.8; }
+.lecciones-progreso { color:#aab5aa; font-size:13px; }
+.lecciones-progreso strong,.leccion-metricas strong { color:var(--verde); }
+.leccion-metricas { display:flex; justify-content:space-between; gap:14px; color:#89958b; font-size:12px; }
+@keyframes cursor-pulso { 50% { opacity:0; } }
+@media (max-width:640px) {
+  .vista-contenido .texto.texto-flotante { font-size:25px; line-height:1.85; }
+  .leccion-cabecera { align-items:flex-start; flex-direction:column; }
+}
