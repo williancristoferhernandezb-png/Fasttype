@@ -3,6 +3,7 @@ import "./App.css";
 import Login from "./Login";
 import Inicio from "./Inicio";
 import Lecciones from "./Lecciones";
+import ControlesTexto, { estiloEscritura, type FuenteEscritura } from "./ControlesTexto";
 import {
   obtenerSesion,
   cerrarSesion,
@@ -22,7 +23,7 @@ function textoAleatorio() {
   return TEXTOS[Math.floor(Math.random() * TEXTOS.length)];
 }
 
-function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => void; onInicio: () => void }) {
+function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [texto, setTexto] = useState(textoAleatorio);
   const [escrito, setEscrito] = useState("");
   const [tiempo, setTiempo] = useState(DURACION);
@@ -76,10 +77,11 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
   }
 
   return (
-    <section className="vista-contenido pantalla-entrenamiento prueba-libre">
+    <section className="vista-contenido pantalla-entrenamiento prueba-libre" style={estiloEscritura(fuente, tamano)}>
       <div className="vista-cabecera">
         <button className="boton-texto" onClick={onInicio}>← INICIO</button>
         <span className="usuario-chip">{usuario}</span>
+        <ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} />
         <button className="boton-salir" onClick={onSalir}>Salir</button>
       </div>
       <h1>PRUEBA <span>LIBRE.</span></h1>
@@ -132,6 +134,16 @@ function App() {
   const [usuario, setUsuario] = useState<string | null>(null);
   const [comprobandoSesion, setComprobandoSesion] = useState(true);
   const [vista, setVista] = useState<"inicio" | "lecciones" | "libre">("inicio");
+  const [fuente, setFuente] = useState<FuenteEscritura>(() => {
+    const v = localStorage.getItem("fasttype_fuente");
+    return v === "Lexend" || v === "Atkinson Hyperlegible" || v === "Arial" ? v : "Inter";
+  });
+  const [tamano, setTamano] = useState(() => {
+    const n = Number(localStorage.getItem("fasttype_tamano"));
+    return Number.isFinite(n) && n >= 20 && n <= 42 ? n : 32;
+  });
+  function cambiarFuente(v: FuenteEscritura) { setFuente(v); localStorage.setItem("fasttype_fuente", v); }
+  function cambiarTamano(v: number) { setTamano(v); localStorage.setItem("fasttype_tamano", String(v)); }
 
   useEffect(() => {
     let activo = true;
@@ -179,10 +191,10 @@ function App() {
             <span className="usuario-chip">{usuario}</span>
             <button className="boton-salir" onClick={salir}>Salir</button>
           </div>
-          <Lecciones usuario={usuario} />
+          <Lecciones usuario={usuario} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
         </section>
       ) : (
-        <Test usuario={usuario} onSalir={salir} onInicio={() => setVista("inicio")} />
+        <Test usuario={usuario} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
       )}
     </div>
   );
