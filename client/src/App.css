@@ -963,3 +963,14 @@ html, body, #root { min-height: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .manos .dedo-animado, .mano-numpad .dedo-animado { animation:none; }
 }
+
+/* Keep the preference controls aligned with the top navigation on both practice modes */
+.prueba-libre .vista-cabecera { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.prueba-libre .vista-cabecera .preferencias-texto { margin-left:auto; }
+.leccion-controles { flex-wrap:wrap; }
+.leccion-controles .preferencias-texto { order:3; }
+@media (max-width:760px) {
+  .prueba-libre .vista-cabecera { gap:8px; }
+  .prueba-libre .vista-cabecera .preferencias-texto { order:3; width:100%; justify-content:flex-start; }
+  .leccion-controles .preferencias-texto { order:3; }
+}
