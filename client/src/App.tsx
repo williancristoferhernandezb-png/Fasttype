@@ -84,7 +84,7 @@ function Test({ usuario, onSalir, onInicio }: { usuario: string; onSalir: () => 
       </div>
       <h1>PRUEBA <span>LIBRE.</span></h1>
       <p className="tiempo">{tiempo}s</p>
-      <p className="texto">{texto.split("").map((letra, i) => {
+      <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">\n        <p className="texto texto-flotante" aria-label={texto}>{texto.split("").map((letra, i) => {
         let clase = "pendiente";
         if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
         return <span key={i} className={clase}>{letra}</span>;
