@@ -326,14 +326,12 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           {leccion.texto.split("").map((letra, i) => {
             let clase = "pendiente";
             if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
-            // En un error mostramos qué se tecleó (␣ si fue un espacio) y los
-            // espacios esperados llevan su propia clase para poder resaltarlos.
-            const tecleado = clase === "incorrecta" ? (escrito[i] === " " ? "␣" : escrito[i]) : undefined;
+            // Los espacios esperados llevan su propia clase para poder marcarlos
+            // en rojo cuando se falla (un espacio no tiene texto que colorear).
             return (
               <span
                 key={i}
                 className={`caracter-escritura ${clase}${letra === " " ? " caracter-espacio" : ""}`}
-                data-escrito={tecleado}
               >
                 {i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}
                 {letra === " " ? "\u00a0" : letra}

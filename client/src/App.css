@@ -1164,23 +1164,11 @@ html, body, #root { min-height: 100%; }
    debe aceptar inserciones de texto del navegador que puedan convertir 0 en espacio. */
 .leccion-activa .input-escritura-invisible { ime-mode:disabled; }
 
-/* Errores visibles en la lección: un espacio fallado se resalta (antes era
-   invisible) y cada error muestra, pequeño, lo que se tecleó. No altera el
-   tamaño de las líneas, así que la pantalla sigue sin scroll. */
+/* Un espacio fallado se marca en rojo (antes era invisible porque un espacio
+   no tiene texto que colorear). No altera el tamaño de las líneas, así que la
+   pantalla sigue sin scroll. */
 .leccion-activa .texto-flotante .caracter-escritura.caracter-espacio.incorrecta {
   background: rgba(255, 64, 95, .28);
   border-radius: 4px;
   box-shadow: inset 0 -3px 0 #ff405f;
-}
-.leccion-activa .texto-flotante .caracter-escritura.incorrecta[data-escrito]::after {
-  content: attr(data-escrito);
-  position: absolute;
-  left: 50%;
-  top: -.1em;
-  transform: translateX(-50%);
-  font-size: .42em;
-  line-height: 1;
-  color: #ffc2cd;
-  text-shadow: none;
-  pointer-events: none;
 }

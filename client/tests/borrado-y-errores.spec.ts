@@ -73,7 +73,7 @@ test("NumpadBackspace (Backspace del bloque numérico) también borra", async ({
   await expect(contador(page)).toHaveText(/^1 \/ \d+$/);
 });
 
-test("Numpad0 donde se espera un espacio queda marcado como error y muestra el 0", async ({ page }) => {
+test("Numpad0 donde se espera un espacio marca ese espacio como error", async ({ page }) => {
   await openLesson(page, "space");
   const characters = page.locator(".caracter-escritura");
 
@@ -82,18 +82,17 @@ test("Numpad0 donde se espera un espacio queda marcado como error y muestra el 0
 
   const espacio = characters.nth(1);
   await expect(espacio).toHaveClass(/incorrecta/);
+  // Los espacios llevan su propia clase para poder pintarse en rojo.
   await expect(espacio).toHaveClass(/caracter-espacio/);
-  await expect(espacio).toHaveAttribute("data-escrito", "0");
-  // Los aciertos no llevan marca de error.
-  await expect(characters.nth(0)).not.toHaveAttribute("data-escrito", /.*/);
+  await expect(characters.nth(0)).toHaveClass(/correcta/);
 });
 
-test("Un espacio tecleado donde se espera un número se muestra como ␣", async ({ page }) => {
+test("Un espacio tecleado donde se espera un número marca ese número como error", async ({ page }) => {
   await openLesson(page, "space");
   const characters = page.locator(".caracter-escritura");
 
   await page.keyboard.press("Space");
 
   await expect(characters.nth(0)).toHaveClass(/incorrecta/);
-  await expect(characters.nth(0)).toHaveAttribute("data-escrito", "␣");
+  await expect(characters.nth(0)).not.toHaveClass(/caracter-espacio/);
 });
