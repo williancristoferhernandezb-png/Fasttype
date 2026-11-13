@@ -194,7 +194,8 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
         NumpadDivide: "/",
       };
       const caracter = mapaNumpad[e.code] ??
-        (e.keyCode === 96 ? "0" : undefined);
+        (e.keyCode === 96 || (e.location === 3 &&
+          (e.key === "0" || e.key === "Insert" || e.key === " ")) ? "0" : undefined);
       if (caracter !== undefined) {
         e.preventDefault();
         e.stopPropagation();
