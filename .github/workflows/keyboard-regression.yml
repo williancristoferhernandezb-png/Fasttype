@@ -1,0 +1,34 @@
+name: Fasttype keyboard regression
+
+on:
+  push:
+    branches: [feature/better-auth-results]
+  pull_request:
+    branches: [feature/better-auth-results]
+  workflow_dispatch:
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - name: Install project dependencies
+        run: npm ci
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build frontend and type-check
+        run: npm run build
+      - name: Run keyboard regression tests
+        run: npx playwright test
