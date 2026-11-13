@@ -184,7 +184,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
           {texto.split("").map((letra, i) => {
             let clase = "pendiente";
             if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
-            return <span key={i} className={\`caracter-escritura \${clase}\`}>{i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}{letra === " " ? "\\u00a0" : letra}</span>;
+            return <span key={i} className={`caracter-escritura ${clase}`}>{i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}{letra === " " ? "\u00a0" : letra}</span>;
           })}
           {escrito.length === texto.length && <span className="cursor-escritura cursor-final" aria-hidden="true" />}
         </p>
