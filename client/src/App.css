@@ -1226,3 +1226,85 @@ html, body, #root { min-height: 100%; }
   .prueba-libre-controles .selector-duracion button { min-width:29px; padding:6px 7px; }
   .tecla-reinicio-libre { padding:5px 6px; }
 }
+
+
+/* La configuración de la prueba vive en la barra superior para despejar
+   el área central de escritura. */
+.cabecera-prueba-libre {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:16px;
+  padding-bottom:10px;
+}
+.cabecera-prueba-libre .prueba-libre-controles {
+  flex:1 1 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:6px;
+  margin:0;
+}
+.cabecera-prueba-libre .selector-duracion {
+  padding:2px;
+  gap:1px;
+  border-radius:6px;
+}
+.cabecera-prueba-libre .selector-duracion button {
+  min-width:30px;
+  padding:5px 7px;
+  font-size:10px;
+}
+.cabecera-prueba-libre .selector-duracion button:nth-child(4) {
+  padding-left:8px;
+  padding-right:8px;
+}
+.cabecera-prueba-libre .tecla-reinicio-libre {
+  gap:4px;
+  padding:4px 6px;
+  font-size:9px;
+}
+.cabecera-prueba-libre .tecla-reinicio-libre select {
+  font-size:10px;
+}
+.cabecera-prueba-libre .reiniciar-libre {
+  width:27px;
+  height:27px;
+  justify-content:center;
+  padding:0;
+  font-size:13px;
+}
+.cabecera-prueba-libre .duracion-personalizada {
+  padding:3px 5px;
+  gap:4px;
+  font-size:10px;
+}
+.cabecera-prueba-libre .duracion-personalizada input {
+  width:54px;
+}
+.cabecera-prueba-libre + h1 {
+  margin-top:0;
+}
+@media (max-width:760px) {
+  .cabecera-prueba-libre {
+    justify-content:flex-start;
+    gap:7px;
+  }
+  .cabecera-prueba-libre .prueba-libre-controles {
+    order:5;
+    flex-basis:100%;
+    justify-content:flex-start;
+  }
+}
+@media (max-width:440px) {
+  .cabecera-prueba-libre .prueba-libre-controles {
+    gap:5px;
+  }
+  .cabecera-prueba-libre .selector-duracion button {
+    min-width:27px;
+    padding:5px 5px;
+  }
+}
