@@ -182,11 +182,23 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       return;
     }
 
-    // Garantiza que Numpad 0 se escriba como el carácter "0".
-    // Nunca debe convertirse en espacio: el espacio solo llega con Space.
-    if (curso === "numpad" && e.code === "Numpad0") {
+    // El cero físico del teclado numérico siempre representa "0".
+    // Algunos navegadores/estados de Bloq Num lo reportan como Insert o
+    // incluso como espacio; location===3 identifica el bloque numérico.
+    const esCeroNumpad =
+      e.code === "Numpad0" ||
+      (e.location === 3 && (e.key === "0" || e.key === "Insert" || e.key === " "));
+    if (esCeroNumpad) {
       e.preventDefault();
+      e.stopPropagation();
       if (!terminado) manejarEscritura(escrito + "0");
+      return;
+    }
+
+    // Solo la barra espaciadora física puede introducir un espacio.
+    // Evita que una tecla del bloque numérico sea interpretada como Space.
+    if (e.key === " " && e.code !== "Space") {
+      e.preventDefault();
       return;
     }
   }
