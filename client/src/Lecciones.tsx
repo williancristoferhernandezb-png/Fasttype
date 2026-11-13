@@ -208,6 +208,16 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       const codigo = e.nativeEvent.code;
       const caracter = mapaNumpad[codigo];
 
+      // Borrar. En este curso el onChange está desactivado, así que Backspace
+      // (y NumpadBackspace, que algunos teclados traen en el bloque numérico)
+      // debe borrar desde aquí. Va antes del bloqueo genérico de "Numpad*".
+      if (codigo === "Backspace" || codigo === "NumpadBackspace" || e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!terminado) manejarEscritura(escrito.slice(0, -1));
+        return;
+      }
+
       if (caracter !== undefined) {
         e.preventDefault();
         e.stopPropagation();
@@ -316,8 +326,15 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           {leccion.texto.split("").map((letra, i) => {
             let clase = "pendiente";
             if (i < escrito.length) clase = escrito[i] === letra ? "correcta" : "incorrecta";
+            // En un error mostramos qué se tecleó (␣ si fue un espacio) y los
+            // espacios esperados llevan su propia clase para poder resaltarlos.
+            const tecleado = clase === "incorrecta" ? (escrito[i] === " " ? "␣" : escrito[i]) : undefined;
             return (
-              <span key={i} className={`caracter-escritura ${clase}`}>
+              <span
+                key={i}
+                className={`caracter-escritura ${clase}${letra === " " ? " caracter-espacio" : ""}`}
+                data-escrito={tecleado}
+              >
                 {i === escrito.length && !terminado && <span className="cursor-escritura" aria-hidden="true" />}
                 {letra === " " ? "\u00a0" : letra}
               </span>
