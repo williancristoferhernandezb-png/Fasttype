@@ -38,3 +38,18 @@ test("Numpad0 writes zero in the lesson dedicated to zero", async ({ page }) => 
   await expect(characters.nth(0)).toHaveClass(/correcta/);
   await expect(characters.nth(1)).toHaveClass(/correcta/);
 });
+
+
+test("NumpadEnter advances after a lesson is completed", async ({ page }) => {
+  await openLesson(page, "space");
+  const target = await page.locator(".texto").getAttribute("aria-label");
+  if (!target) throw new Error("The lesson target text was not rendered");
+
+  for (const character of target) {
+    await page.keyboard.press(character === " " ? "Space" : `Numpad${character}`);
+  }
+
+  await expect(page.locator(".leccion-final")).toContainText("Lección completada");
+  await page.keyboard.press("NumpadEnter");
+  await expect(page.locator(".leccion-titulo-control strong")).toHaveText("Conoce las teclas 4 6");
+});
