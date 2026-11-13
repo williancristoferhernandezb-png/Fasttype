@@ -34,7 +34,9 @@ function generarTexto(longitud: number) {
 
 function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [duracion, setDuracion] = useState<number>(() => {
-    const v = Number(localStorage.getItem("fasttype_duracion_libre"));
+    const guardada = localStorage.getItem("fasttype_duracion_libre");
+    if (guardada === null) return DURACION;
+    const v = Number(guardada);
     return Number.isFinite(v) && v >= 0 && v <= 3600 && (v === 0 || v >= 5) ? v : DURACION;
   });
   const [duracionPersonalizada, setDuracionPersonalizada] = useState(() => {
