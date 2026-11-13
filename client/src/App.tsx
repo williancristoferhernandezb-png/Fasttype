@@ -48,7 +48,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   });
   const [texto, setTexto] = useState(() => generarTexto(12 * DURACION));
   const [escrito, setEscrito] = useState("");
-  const [tiempo, setTiempo] = useState(DURACION);
+  const [tiempo, setTiempo] = useState(duracion);
   const [transcurrido, setTranscurrido] = useState(0);
   const [iniciado, setIniciado] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -187,7 +187,6 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
         </p>
         <input ref={inputRef} className="input-escritura-invisible" type="text" value={escrito} onChange={manejarCambio} onKeyDown={manejarTecla} onPaste={(e) => e.preventDefault()} disabled={terminado} autoComplete="off" autoCapitalize="off" spellCheck={false} autoFocus aria-label="Escribe aquí el texto de la prueba libre" />
       </div>
-      <div className="acciones"><button onClick={() => reiniciar()}>Reiniciar prueba</button></div>
       {terminado && <div className="resultado"><div><strong>{wpm}</strong>WPM</div><div><strong>{precision}%</strong>Precisión</div></div>}
       <div className="paneles paneles-resultados">
         <div className="panel"><h3>Tu historial</h3><ul>{historial.slice(0, 5).map((r) => <li key={r.id}>{r.wpm} WPM · {r.precision}% · {new Date(r.creado_en).toLocaleDateString()}</li>)}</ul></div>
