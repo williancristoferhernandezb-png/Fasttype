@@ -182,24 +182,35 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       return;
     }
 
-    // El cero físico del teclado numérico siempre representa "0".
-    // Algunos navegadores/estados de Bloq Num lo reportan como Insert o
-    // incluso como espacio; location===3 identifica el bloque numérico.
-    const esCeroNumpad =
-      e.code === "Numpad0" ||
-      (e.location === 3 && (e.key === "0" || e.key === "Insert" || e.key === " "));
-    if (esCeroNumpad) {
-      e.preventDefault();
-      e.stopPropagation();
-      if (!terminado) manejarEscritura(escrito + "0");
-      return;
-    }
-
-    // Solo la barra espaciadora física puede introducir un espacio.
-    // Evita que una tecla del bloque numérico sea interpretada como Space.
-    if (e.key === " " && e.code !== "Space") {
-      e.preventDefault();
-      return;
+    // En el curso Numpad capturamos las teclas directamente por e.code.
+    // Así el cero nunca depende del carácter que el navegador inserte en el input
+    // (algunos teclados lo reportan como Insert/espacio según Bloq Num).
+    if (curso === "numpad") {
+      const mapaNumpad: Record<string, string> = {
+        Numpad0: "0", Numpad1: "1", Numpad2: "2", Numpad3: "3",
+        Numpad4: "4", Numpad5: "5", Numpad6: "6", Numpad7: "7",
+        Numpad8: "8", Numpad9: "9", NumpadDecimal: ".",
+        NumpadAdd: "+", NumpadSubtract: "-", NumpadMultiply: "*",
+        NumpadDivide: "/",
+      };
+      const caracter = mapaNumpad[e.code] ??
+        (e.keyCode === 96 ? "0" : undefined);
+      if (caracter !== undefined) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!terminado) manejarEscritura(escrito + caracter);
+        return;
+      }
+      if (e.code === "Space") {
+        e.preventDefault();
+        if (!terminado) manejarEscritura(escrito + " ");
+        return;
+      }
+      // Ninguna otra tecla puede insertar caracteres en el campo del numpad.
+      if (e.key.length === 1 || e.key === "Insert" || e.key === " ") {
+        e.preventDefault();
+        return;
+      }
     }
   }
 
@@ -302,7 +313,11 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           className="input-escritura-invisible"
           type="text"
           value={escrito}
-          onChange={(e) => manejarEscritura(e.target.value)}
+          onChange={(e) => {
+            // En Numpad la entrada se procesa exclusivamente desde onKeyDown.
+            // Bloquea cualquier inserción automática del navegador (incluido espacio).
+            if (curso !== "numpad") manejarEscritura(e.target.value);
+          }}
           onKeyDown={manejarTeclaEspecial}
           onPaste={(e) => e.preventDefault()}
           autoComplete="off"
