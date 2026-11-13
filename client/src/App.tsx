@@ -150,14 +150,10 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
 
   return (
     <section className="vista-contenido pantalla-entrenamiento prueba-libre" style={estiloEscritura(fuente, tamano)}>
-      <div className="vista-cabecera">
+      <div className="vista-cabecera cabecera-prueba-libre">
         <button className="boton-texto" onClick={onInicio}>← INICIO</button>
         <span className="usuario-chip">{usuario}</span>
-        <ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} />
-        <button className="boton-salir" onClick={onSalir}>Salir</button>
-      </div>
-      <h1>PRUEBA <span>LIBRE.</span></h1>
-      <div className="prueba-libre-controles" aria-label="Configuración de la prueba">
+        <div className="prueba-libre-controles" aria-label="Configuración de la prueba">
         <div className="selector-duracion" role="group" aria-label="Duración">
           {DURACIONES.map((valor) => <button key={valor} className={duracion === valor ? "activa" : ""} onClick={() => elegirDuracion(valor)} aria-pressed={duracion === valor}>{valor}s</button>)}
           <button className={mostrarPersonalizado || (duracion !== 0 && !DURACIONES.includes(duracion as 15 | 30 | 60)) ? "activa" : ""} onClick={() => setMostrarPersonalizado((v) => !v)} aria-expanded={mostrarPersonalizado}>Personalizado</button>
@@ -176,8 +172,12 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
             <option value="Tab">Tab</option><option value="Control">Ctrl</option><option value="Shift">Shift</option>
           </select>
         </label>
-        <button className="reiniciar-libre" onClick={() => reiniciar()} title="Reiniciar prueba">↻ <span>Reiniciar</span></button>
+        <button className="reiniciar-libre" onClick={() => reiniciar()} title="Reiniciar prueba" aria-label="Reiniciar prueba">↻</button>
       </div>
+        <ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} />
+        <button className="boton-salir" onClick={onSalir}>Salir</button>
+      </div>
+      <h1>PRUEBA <span>LIBRE.</span></h1>
       <p className="tiempo">{duracion === 0 ? tiempoVisible : tiempo + "s"}</p>
       <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">
         <p className="texto texto-flotante" aria-label={texto}>
