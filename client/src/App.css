@@ -1172,3 +1172,57 @@ html, body, #root { min-height: 100%; }
   border-radius: 4px;
   box-shadow: inset 0 -3px 0 #ff405f;
 }
+
+
+/* Controles minimalistas de duración y reinicio para la prueba libre */
+.prueba-libre-controles {
+  display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+  gap:9px; margin:0 auto 8px; color:#89958b; font-size:11px;
+}
+.selector-duracion {
+  display:flex; align-items:center; gap:3px; padding:3px;
+  border:1px solid rgba(255,255,255,.09); border-radius:8px;
+  background:rgba(17,23,18,.72);
+}
+.prueba-libre-controles .selector-duracion button {
+  min-width:34px; padding:6px 9px; border:0; border-radius:5px;
+  color:#9ca69d; background:transparent; font:500 11px 'Inter',sans-serif;
+}
+.prueba-libre-controles .selector-duracion button.activa {
+  color:#10150e; background:var(--verde); font-weight:700;
+}
+.duracion-personalizada {
+  display:flex; align-items:center; gap:6px;
+  padding:4px 7px; border:1px solid rgba(255,255,255,.09); border-radius:7px;
+  background:#151c16;
+}
+.duracion-personalizada input {
+  width:66px; padding:4px 5px; border:1px solid rgba(255,255,255,.12);
+  border-radius:4px; color:#e7eee7; background:#101510; font:11px 'Inter',sans-serif;
+}
+.duracion-personalizada button {
+  padding:5px 8px; border:0; border-radius:4px;
+  color:#10150e; background:var(--verde); font-size:10px;
+}
+.tecla-reinicio-libre {
+  display:flex; align-items:center; gap:6px; padding:5px 8px;
+  border:1px solid rgba(255,255,255,.09); border-radius:7px;
+  color:#89958b; background:#151c16; font-size:10px;
+}
+.tecla-reinicio-libre select {
+  border:0; outline:0; color:#e7eee7; background:transparent;
+  font:500 11px 'Inter',sans-serif; cursor:pointer;
+}
+.tecla-reinicio-libre option { color:#e7eee7; background:#111712; }
+.prueba-libre-controles .reiniciar-libre {
+  display:flex; align-items:center; gap:5px; padding:6px 9px;
+  border:1px solid rgba(255,255,255,.1); border-radius:7px;
+  color:#dce6dc; background:#151c16; font-size:11px;
+}
+.prueba-libre-controles .reiniciar-libre:hover { border-color:var(--verde); color:var(--verde); }
+.prueba-libre .tiempo { font-variant-numeric:tabular-nums; }
+@media (max-width:640px) {
+  .prueba-libre-controles { gap:6px; }
+  .prueba-libre-controles .selector-duracion button { min-width:29px; padding:6px 7px; }
+  .tecla-reinicio-libre { padding:5px 6px; }
+}
