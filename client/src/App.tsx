@@ -35,7 +35,7 @@ function generarTexto(longitud: number) {
 function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [duracion, setDuracion] = useState<number>(() => {
     const v = Number(localStorage.getItem("fasttype_duracion_libre"));
-    return [15, 30, 60, 0].includes(v) ? v : DURACION;
+    return Number.isFinite(v) && v >= 0 && v <= 3600 && (v === 0 || v >= 5) ? v : DURACION;
   });
   const [duracionPersonalizada, setDuracionPersonalizada] = useState(() => {
     const v = Number(localStorage.getItem("fasttype_duracion_personalizada"));
@@ -127,7 +127,8 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
     const nuevoTexto = e.target.value;
     setEscrito(nuevoTexto);
     if (duracion === 0 && texto.length - nuevoTexto.length < 120) {
-      setTexto((anterior) => anterior + " " + textoAleatorio());
+      const textoExtra = " " + textoAleatorio();
+      setTexto((anterior) => anterior + textoExtra);
     }
   }
 
@@ -156,9 +157,9 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
       <h1>PRUEBA <span>LIBRE.</span></h1>
       <div className="prueba-libre-controles" aria-label="Configuración de la prueba">
         <div className="selector-duracion" role="group" aria-label="Duración">
-          {DURACIONES.map((valor) => <button key={valor} className={duracion === valor ? "activa" : ""} onClick={() => elegirDuracion(valor)} aria-pressed={duracion === valor}>{valor}</button>)}
+          {DURACIONES.map((valor) => <button key={valor} className={duracion === valor ? "activa" : ""} onClick={() => elegirDuracion(valor)} aria-pressed={duracion === valor}>{valor}s</button>)}
           <button className={mostrarPersonalizado || (duracion !== 0 && !DURACIONES.includes(duracion as 15 | 30 | 60)) ? "activa" : ""} onClick={() => setMostrarPersonalizado((v) => !v)} aria-expanded={mostrarPersonalizado}>Personalizado</button>
-          <button className={duracion === 0 ? "activa" : ""} onClick={() => elegirDuracion(0)} aria-pressed={duracion === 0}>∞</button>
+          <button className={duracion === 0 ? "activa" : ""} onClick={() => elegirDuracion(0)} aria-pressed={duracion === 0}>Sin límite</button>
         </div>
         {mostrarPersonalizado && (
           <form className="duracion-personalizada" onSubmit={aplicarPersonalizado}>
