@@ -336,6 +336,11 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
             if (curso !== "numpad") manejarEscritura(e.target.value);
           }}
           onKeyDown={manejarTeclaEspecial}
+          onBeforeInput={(e) => {
+            // En Numpad toda la entrada viene del código físico capturado arriba.
+            // Evita que beforeinput inserte por segunda vez el carácter del navegador.
+            if (curso === "numpad") e.preventDefault();
+          }}
           onPaste={(e) => e.preventDefault()}
           autoComplete="off"
           autoCapitalize="off"
