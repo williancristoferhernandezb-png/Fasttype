@@ -1122,3 +1122,44 @@ html, body, #root { min-height: 100%; }
   .leccion-activa > .teclado:has(.numpad-zona) { width:min(220px,100%); }
   .leccion-activa > .teclado:has(.numpad-zona) .numpad-zona { --k:36px; width:calc(var(--k) * 4 + 15px); }
 }
+
+
+/* La vista de catálogo debe permitir recorrer todas las lecciones.
+   El recorte de una sola pantalla se reserva para el ejercicio activo. */
+.vista-lecciones:has(.lecciones-inicio) {
+  overflow-x:hidden;
+  overflow-y:auto;
+  min-height:0;
+  max-height:calc(100dvh - 76px);
+  height:calc(100dvh - 76px);
+  align-items:stretch;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(182,255,0,.35) transparent;
+}
+.vista-lecciones:has(.lecciones-inicio) .vista-cabecera {
+  position:sticky;
+  top:0;
+  z-index:50;
+  flex:0 0 auto;
+}
+.vista-lecciones:has(.lecciones-inicio) .lecciones-inicio {
+  flex:0 0 auto;
+  width:100%;
+  min-height:min-content;
+  padding-bottom:28px;
+}
+.vista-lecciones:has(.lecciones-inicio) .lista-lecciones {
+  overflow:visible;
+  padding-bottom:18px;
+}
+@media (max-width:640px) {
+  .vista-lecciones:has(.lecciones-inicio) {
+    height:calc(100dvh - 60px);
+    max-height:calc(100dvh - 60px);
+  }
+}
+
+/* El teclado numérico se procesa por códigos físicos; el campo oculto no
+   debe aceptar inserciones de texto del navegador que puedan convertir 0 en espacio. */
+.leccion-activa .input-escritura-invisible { ime-mode:disabled; }
