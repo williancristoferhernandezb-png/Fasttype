@@ -51,5 +51,5 @@ test("NumpadEnter advances after a lesson is completed", async ({ page }) => {
 
   await expect(page.locator(".leccion-final")).toContainText("Lección completada");
   await page.keyboard.press("NumpadEnter");
-  await expect(page.locator(".leccion-titulo-control strong")).toHaveText("Conoce las teclas 4 6");
+  await expect(page.locator(".leccion-titulo-control strong")).toHaveText("Combinaciones 1");
 });
