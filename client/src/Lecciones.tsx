@@ -182,35 +182,51 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       return;
     }
 
-    // En el curso Numpad capturamos las teclas directamente por e.code.
-    // Así el cero nunca depende del carácter que el navegador inserte en el input
-    // (algunos teclados lo reportan como Insert/espacio según Bloq Num).
+    // En el curso Numpad solo aceptamos códigos físicos inequívocos.
+    // Numpad0 siempre escribe "0"; Space siempre escribe un espacio.
+    // No usamos e.key, keyCode ni location como sustitutos: esos valores
+    // dependen del estado de Bloq Num y nunca deben convertir una tecla en otra.
     if (curso === "numpad") {
       const mapaNumpad: Record<string, string> = {
-        Numpad0: "0", Numpad1: "1", Numpad2: "2", Numpad3: "3",
-        Numpad4: "4", Numpad5: "5", Numpad6: "6", Numpad7: "7",
-        Numpad8: "8", Numpad9: "9", NumpadDecimal: ".",
-        NumpadAdd: "+", NumpadSubtract: "-", NumpadMultiply: "*",
+        Numpad0: "0",
+        Numpad1: "1",
+        Numpad2: "2",
+        Numpad3: "3",
+        Numpad4: "4",
+        Numpad5: "5",
+        Numpad6: "6",
+        Numpad7: "7",
+        Numpad8: "8",
+        Numpad9: "9",
+        NumpadDecimal: ".",
+        NumpadAdd: "+",
+        NumpadSubtract: "-",
+        NumpadMultiply: "*",
         NumpadDivide: "/",
       };
-      const caracter = mapaNumpad[e.code] ??
-        (e.keyCode === 96 || (e.location === 3 &&
-          (e.key === "0" || e.key === "Insert" || e.key === " ")) ? "0" : undefined);
+
+      const codigo = e.nativeEvent.code;
+      const caracter = mapaNumpad[codigo];
+
       if (caracter !== undefined) {
         e.preventDefault();
         e.stopPropagation();
         if (!terminado) manejarEscritura(escrito + caracter);
         return;
       }
-      if (e.code === "Space") {
+
+      if (codigo === "Space") {
         e.preventDefault();
+        e.stopPropagation();
         if (!terminado) manejarEscritura(escrito + " ");
         return;
       }
-      // Ninguna otra tecla puede insertar caracteres en el campo del numpad.
-      if (e.key.length === 1 || e.key === "Insert" || e.key === " ") {
+
+      // Bloquea cualquier otra entrada nativa. Las teclas no reconocidas
+      // no se transforman en cero ni en espacio.
+      if (codigo.startsWith("Numpad") || e.key.length === 1 || e.key === "Insert" || e.key === " ") {
         e.preventDefault();
-        return;
+        e.stopPropagation();
       }
     }
   }
