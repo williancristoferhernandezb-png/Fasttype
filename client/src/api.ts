@@ -114,3 +114,44 @@ export async function pedirRanking() {
     mejor_wpm: number;
   }[]>(res);
 }
+
+
+export type ResultadoPractica = {
+  id: number;
+  wpm: number;
+  precision: number;
+  segundos: number;
+  creado_en: string;
+};
+
+export type ResumenPerfil = {
+  practicas: number;
+  promedio_wpm: number;
+  mejor_wpm: number;
+  promedio_precision: number;
+  segundos_totales: number | string;
+};
+
+export type EntradaRanking = {
+  nombre: string;
+  mejor_wpm: number;
+};
+
+export async function pedirResumenPerfil(): Promise<ResumenPerfil> {
+  const res = await fetch(`${API}/resultados/resumen`, {
+    credentials: "include",
+  });
+  return respuestaAuth<ResumenPerfil>(res);
+}
+
+export async function pedirHistorialPerfil(): Promise<ResultadoPractica[]> {
+  const res = await fetch(`${API}/resultados/historial`, {
+    credentials: "include",
+  });
+  return respuestaAuth<ResultadoPractica[]>(res);
+}
+
+export async function pedirRankingPerfil(): Promise<EntradaRanking[]> {
+  const res = await fetch(`${API}/resultados/ranking`);
+  return respuestaAuth<EntradaRanking[]>(res);
+}
