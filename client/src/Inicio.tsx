@@ -2,10 +2,11 @@ type Props = {
   usuario: string;
   onLecciones: () => void;
   onLibre: () => void;
+  onPerfil: () => void;
   onSalir: () => void;
 };
 
-export default function Inicio({ usuario, onLecciones, onLibre, onSalir }: Props) {
+export default function Inicio({ usuario, onLecciones, onLibre, onPerfil, onSalir }: Props) {
   return (
     <main className="inicio">
       <header className="topbar">
@@ -14,6 +15,7 @@ export default function Inicio({ usuario, onLecciones, onLibre, onSalir }: Props
         </a>
         <div className="topbar-derecha">
           <span className="estado-online"><i /> SISTEMA ACTIVO</span>
+          <button className="boton-texto boton-perfil" onClick={onPerfil}>Mi perfil <span>↗</span></button>
           <span className="usuario-chip">{usuario}</span>
           <button className="boton-salir" onClick={onSalir}>Salir</button>
         </div>
