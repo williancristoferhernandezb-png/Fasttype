@@ -5,7 +5,7 @@ import { toNodeHandler } from "better-auth/node";
 
 import { pool } from "./db";
 import { auth } from "./betterAuth";
-import { resultadosRouter } from "./resultados";
+import { resultadosRouter, prepararTablaResultados } from "./resultados";
 
 const app = express();
 const PUERTO = 3000;
@@ -32,6 +32,13 @@ app.get("/api/salud", (_req, res) => {
   res.json({ mensaje: "El servidor funciona" });
 });
 
-app.listen(PUERTO, () => {
-  console.log(`Servidor escuchando en http://localhost:${PUERTO}`);
-});
+prepararTablaResultados()
+  .then(() => {
+    app.listen(PUERTO, () => {
+      console.log(`Servidor escuchando en http://localhost:${PUERTO}`);
+    });
+  })
+  .catch((error) => {
+    console.error("No se pudo preparar la tabla de resultados:", error);
+    process.exit(1);
+  });
