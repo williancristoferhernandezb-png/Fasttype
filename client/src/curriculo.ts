@@ -14,6 +14,7 @@ export interface Leccion {
   instruccion: string;
   texto: string;
   modo: Modo;
+  distribucionUS?: boolean;
 }
 
 export interface Etapa {
@@ -384,6 +385,7 @@ function construir(etapas: Etapa[], modo: Modo): Leccion[] {
       instruccion,
       texto,
       modo,
+      distribucionUS: e.distribucionUS,
     });
   };
 
