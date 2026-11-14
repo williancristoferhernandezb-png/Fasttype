@@ -85,6 +85,28 @@ resultadosRouter.get("/historial", verificarToken, async (req: PeticionAutentica
   }
 });
 
+// Actividad diaria para el calendario y la evolución del perfil (últimos 90 días).
+resultadosRouter.get("/actividad", verificarToken, async (req: PeticionAutenticada, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT DATE(creado_en AT TIME ZONE 'UTC')::text AS fecha,
+              COUNT(*)::int AS practicas,
+              ROUND(AVG(wpm))::int AS promedio_wpm,
+              MAX(wpm)::int AS mejor_wpm
+       FROM resultados_perfil
+       WHERE usuario_id = $1
+         AND creado_en >= NOW() - INTERVAL '90 days'
+       GROUP BY DATE(creado_en AT TIME ZONE 'UTC')
+       ORDER BY fecha ASC`,
+      [req.usuario!.id]
+    );
+    res.json(resultado.rows);
+  } catch (error) {
+    console.error("Error obteniendo actividad:", error);
+    res.status(500).json({ error: "No se pudo obtener la actividad" });
+  }
+});
+
 // Ranking por mejor velocidad registrada.
 resultadosRouter.get("/ranking", async (_req, res) => {
   try {
