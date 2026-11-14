@@ -5,21 +5,19 @@ import ControlesTexto, { estiloEscritura, type FuenteEscritura } from "./Control
 
 const META = 90;
 
-type Seccion = "alfa" | "numerica" | "simbolos";
+type Seccion = "alfa" | "numerica";
 type Variante = "numpad" | "fila";
 
 const CLAVE_PROGRESO: Record<Modo, string> = {
   alfa: "progreso2",
   numpad: "progreso_numpad",
   fila: "progreso_fila",
-  simbolos: "progreso_simbolos_us",
 };
 
 const DESCRIPCION: Record<Modo, string> = {
   alfa: "Letras del teclado: fila base, superior e inferior, palabras y frases.",
   numpad: "Teclado numérico lateral con la técnica de 5 dedos. Tecla guía: el 5.",
   fila: "Números del 1 al 0 de la fila superior, con los dedos de ambas manos desde la fila base.",
-  simbolos: "Símbolos de la distribución estadounidense (US), con práctica progresiva de Shift y combinaciones.",
 };
 
 function leerProgreso(modo: Modo, usuario: string) {
@@ -52,10 +50,9 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     alfa: leerProgreso("alfa", usuario),
     numpad: leerProgreso("numpad", usuario),
     fila: leerProgreso("fila", usuario),
-    simbolos: leerProgreso("simbolos", usuario),
   }));
   const [seccion, setSeccion] = useState<Seccion>(() =>
-    leerPreferencia<Seccion>("seccion_lecciones", ["alfa", "numerica", "simbolos"], "alfa")
+    leerPreferencia<Seccion>("seccion_lecciones", ["alfa", "numerica"], "alfa")
   );
   const [variante, setVariante] = useState<Variante>(() =>
     leerPreferencia<Variante>("variante_numerica", ["numpad", "fila"], "numpad")
@@ -78,7 +75,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     return v === "Tab" || v === "Control" || v === "Shift" ? v : "Tab";
   });
 
-  const curso: Modo = seccion === "alfa" ? "alfa" : seccion === "simbolos" ? "simbolos" : variante;
+  const curso: Modo = seccion === "alfa" ? "alfa" : variante;
   const lecciones = CURSOS[curso];
   const completadas = progreso[curso];
   const leccion = actual !== null ? lecciones[actual] : null;
@@ -167,7 +164,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
 
   function manejarTeclaEspecial(e: React.KeyboardEvent<HTMLInputElement>) {
     const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
-      : teclaReinicio === "Shift" ? e.key === "Shift"
+      : teclaReinicio === "Shift" ? !leccion?.distribucionUS && e.key === "Shift"
       : e.key === "Control" && !e.altKey && !e.metaKey;
     if (coincide) {
       e.preventDefault();
@@ -188,7 +185,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     // En el curso de símbolos usamos la distribución física US por code,
     // no por event.key, para que Shift produzca el símbolo esperado aunque
     // el idioma de entrada del sistema operativo sea distinto.
-    if (curso === "simbolos") {
+    if (leccion?.distribucionUS) {
       const mapaUS: Record<string, [string, string]> = {
         Backquote: ["`", "~"],
         Digit1: ["1", "!"], Digit2: ["2", "@"], Digit3: ["3", "#"],
@@ -206,6 +203,12 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
         KeyB: ["b", "B"], KeyN: ["n", "N"], KeyM: ["m", "M"],
         Comma: [",", "<"], Period: [".", ">"], Slash: ["/", "?"],
       };
+      if (e.code === "Backspace" || e.key === "Backspace") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!terminado) manejarEscritura(escrito.slice(0, -1));
+        return;
+      }
       if (e.code === "Space") {
         e.preventDefault();
         e.stopPropagation();
@@ -300,9 +303,6 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           <button className={seccion === "numerica" ? "activa" : ""} onClick={() => elegirSeccion("numerica")}>
             Lecciones numéricas
           </button>
-          <button className={seccion === "simbolos" ? "activa" : ""} onClick={() => elegirSeccion("simbolos")}>
-            Símbolos US
-          </button>
         </div>
 
         {seccion === "numerica" && (
@@ -396,13 +396,13 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           onChange={(e) => {
             // En Numpad la entrada se procesa exclusivamente desde onKeyDown.
             // Bloquea cualquier inserción automática del navegador (incluido espacio).
-            if (curso !== "numpad" && curso !== "simbolos") manejarEscritura(e.target.value);
+            if (curso !== "numpad" && !leccion?.distribucionUS) manejarEscritura(e.target.value);
           }}
           onKeyDown={manejarTeclaEspecial}
           onBeforeInput={(e) => {
             // En Numpad toda la entrada viene del código físico capturado arriba.
             // Evita que beforeinput inserte por segunda vez el carácter del navegador.
-            if (curso === "numpad" || curso === "simbolos") e.preventDefault();
+            if (curso === "numpad" || leccion?.distribucionUS) e.preventDefault();
           }}
           onPaste={(e) => e.preventDefault()}
           autoComplete="off"
