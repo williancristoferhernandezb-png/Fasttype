@@ -3,6 +3,7 @@ import "./App.css";
 import Login from "./Login";
 import Inicio from "./Inicio";
 import Lecciones from "./Lecciones";
+import Perfil from "./Perfil";
 import ControlesTexto, { estiloEscritura, type FuenteEscritura } from "./ControlesTexto";
 import {
   obtenerSesion,
@@ -202,7 +203,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
 function App() {
   const [usuario, setUsuario] = useState<string | null>(null);
   const [comprobandoSesion, setComprobandoSesion] = useState(true);
-  const [vista, setVista] = useState<"inicio" | "lecciones" | "libre">("inicio");
+  const [vista, setVista] = useState<"inicio" | "lecciones" | "libre" | "perfil">("inicio");
   const [fuente, setFuente] = useState<FuenteEscritura>(() => {
     const v = localStorage.getItem("fasttype_fuente");
     return v === "Lexend" || v === "Atkinson Hyperlegible" || v === "Arial" ? v : "Inter";
@@ -252,7 +253,7 @@ function App() {
   return (
     <div className="app-shell">
       {vista === "inicio" ? (
-        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onSalir={salir} />
+        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onPerfil={() => setVista("perfil")} onSalir={salir} />
       ) : vista === "lecciones" ? (
         <section className="vista-contenido pantalla-entrenamiento vista-lecciones">
           <div className="vista-cabecera">
@@ -262,6 +263,8 @@ function App() {
           </div>
           <Lecciones usuario={usuario} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
         </section>
+      ) : vista === "perfil" ? (
+        <Perfil usuario={usuario} onInicio={() => setVista("inicio")} onSalir={salir} />
       ) : (
         <Test usuario={usuario} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
       )}
