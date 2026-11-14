@@ -5,7 +5,7 @@ import { ETAPAS_SIMBOLOS } from "./curriculoSimbolos";
 // "alfa"   → lecciones alfanuméricas (letras)
 // "numpad" → lecciones numéricas, versión A (teclado numérico lateral)
 // "fila"   → lecciones numéricas, versión B (fila superior 1 al 0)
-export type Modo = "alfa" | "numpad" | "fila" | "simbolos";
+export type Modo = "alfa" | "numpad" | "fila";
 
 export interface Leccion {
   id: number;
@@ -26,6 +26,7 @@ export interface Etapa {
   largas?: boolean;
   palabras?: string[];
   textos?: string[];
+  distribucionUS?: boolean;
 }
 
 const BASE = "asdfjklñ";
@@ -441,8 +442,7 @@ function construir(etapas: Etapa[], modo: Modo): Leccion[] {
   return lista;
 }
 export const CURSOS: Record<Modo, Leccion[]> = {
-  alfa: construir(ETAPAS_ALFA, "alfa"),
+  alfa: construir([...ETAPAS_ALFA, ...ETAPAS_SIMBOLOS], "alfa"),
   numpad: construir(ETAPAS_NUMPAD, "numpad"),
   fila: construir(ETAPAS_FILA, "fila"),
-  simbolos: construir(ETAPAS_SIMBOLOS, "simbolos"),
 };
