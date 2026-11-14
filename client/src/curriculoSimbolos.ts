@@ -17,6 +17,7 @@ const ACUMULADO_TODO = ACUMULADO_10 + "<>";
 export const ETAPAS_SIMBOLOS: Etapa[] = [
   {
     nombre: "Corchetes",
+    distribucionUS: true,
     nuevas: "[]",
     teclas: ACUMULADO_1,
     combos: ACUMULADO_1,
@@ -25,6 +26,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Llaves",
+    distribucionUS: true,
     nuevas: "{}",
     teclas: ACUMULADO_2,
     combos: ACUMULADO_2,
@@ -33,6 +35,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Paréntesis",
+    distribucionUS: true,
     nuevas: "()",
     teclas: ACUMULADO_3,
     combos: ACUMULADO_3,
@@ -41,6 +44,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Comillas",
+    distribucionUS: true,
     nuevas: "\"'",
     teclas: ACUMULADO_4,
     combos: ACUMULADO_4,
@@ -49,6 +53,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Punto y coma",
+    distribucionUS: true,
     nuevas: ";:",
     teclas: ACUMULADO_5,
     combos: ACUMULADO_5,
@@ -57,6 +62,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Barra y barra invertida",
+    distribucionUS: true,
     nuevas: "/\\",
     teclas: ACUMULADO_6,
     combos: ACUMULADO_6,
@@ -65,6 +71,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Interrogación y exclamación",
+    distribucionUS: true,
     nuevas: "?!",
     teclas: ACUMULADO_7,
     combos: ACUMULADO_7,
@@ -73,6 +80,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Arroba, numeral y moneda",
+    distribucionUS: true,
     nuevas: "@#$%",
     teclas: ACUMULADO_8,
     combos: ACUMULADO_8,
@@ -81,6 +89,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Ampersand y asterisco",
+    distribucionUS: true,
     nuevas: "&*",
     teclas: ACUMULADO_9,
     combos: ACUMULADO_9,
@@ -89,6 +98,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Operadores",
+    distribucionUS: true,
     nuevas: "+-=",
     teclas: ACUMULADO_10,
     combos: ACUMULADO_10,
@@ -97,6 +107,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Menor y mayor que",
+    distribucionUS: true,
     nuevas: "<>",
     teclas: ACUMULADO_TODO,
     combos: ACUMULADO_TODO,
@@ -105,6 +116,7 @@ export const ETAPAS_SIMBOLOS: Etapa[] = [
   },
   {
     nombre: "Repaso de todos los símbolos",
+    distribucionUS: true,
     nuevas: "",
     teclas: ACUMULADO_TODO,
     combos: ACUMULADO_TODO,
