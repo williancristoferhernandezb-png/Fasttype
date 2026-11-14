@@ -1,10 +1,11 @@
 import { ETAPAS_NUMPAD, ETAPAS_FILA } from "./curriculoNumerico";
+import { ETAPAS_SIMBOLOS } from "./curriculoSimbolos";
 
 // Cada modo es un curso independiente con su propia numeración y progreso:
 // "alfa"   → lecciones alfanuméricas (letras)
 // "numpad" → lecciones numéricas, versión A (teclado numérico lateral)
 // "fila"   → lecciones numéricas, versión B (fila superior 1 al 0)
-export type Modo = "alfa" | "numpad" | "fila";
+export type Modo = "alfa" | "numpad" | "fila" | "simbolos";
 
 export interface Leccion {
   id: number;
@@ -443,4 +444,5 @@ export const CURSOS: Record<Modo, Leccion[]> = {
   alfa: construir(ETAPAS_ALFA, "alfa"),
   numpad: construir(ETAPAS_NUMPAD, "numpad"),
   fila: construir(ETAPAS_FILA, "fila"),
+  simbolos: construir(ETAPAS_SIMBOLOS, "simbolos"),
 };
