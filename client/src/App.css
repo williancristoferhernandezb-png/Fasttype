@@ -1308,3 +1308,70 @@ html, body, #root { min-height: 100%; }
     padding:5px 5px;
   }
 }
+
+
+/* Perfil personal: estadísticas fuera de la pantalla de práctica. */
+.perfil-pagina { min-height:100vh; color:#f4f5f7; background:#0b100c; }
+.perfil-topbar { width:min(1180px,calc(100% - 48px)); margin:0 auto; padding:22px 0; border-bottom:1px solid rgba(255,255,255,.08); }
+.perfil-topbar .topbar-derecha { gap:14px; }
+.perfil-contenido { width:min(1180px,calc(100% - 48px)); margin:0 auto; padding:42px 0 64px; }
+.perfil-intro { display:flex; align-items:center; gap:20px; margin-bottom:38px; }
+.perfil-avatar { display:grid; place-items:center; width:68px; height:68px; flex:0 0 68px; border:1px solid rgba(182,255,0,.4); border-radius:50%; color:var(--verde); background:rgba(182,255,0,.07); font-size:27px; font-weight:800; }
+.perfil-intro .eyebrow { margin:0 0 6px; }
+.perfil-intro h1 { margin:0; font-size:clamp(30px,5vw,46px); line-height:1; font-weight:850; }
+.perfil-intro h1 span { color:var(--verde); }
+.perfil-subtitulo { margin:9px 0 0; color:#89958b; font-size:13px; }
+.perfil-seccion { min-width:0; }
+.perfil-seccion-titulo { display:flex; align-items:end; justify-content:space-between; gap:12px; margin-bottom:15px; }
+.perfil-seccion-titulo .eyebrow { margin:0 0 5px; }
+.perfil-seccion-titulo h2 { margin:0; color:#eaf0ea; font-size:16px; letter-spacing:.06em; }
+.perfil-seccion-titulo > span { color:#758078; font-size:10px; white-space:nowrap; }
+.perfil-metricas { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+.perfil-metrica { display:flex; flex-direction:column; min-height:128px; padding:17px 15px; border:1px solid #263128; border-radius:9px; background:#121913; }
+.perfil-metrica > span { color:#879287; font-size:9px; letter-spacing:.08em; }
+.perfil-metrica strong { margin-top:17px; color:var(--verde); font-family:'Barlow Condensed',sans-serif; font-size:35px; line-height:1; font-variant-numeric:tabular-nums; }
+.perfil-metrica strong i { margin-left:2px; font-size:18px; font-style:normal; }
+.perfil-metrica small { margin-top:7px; color:#6e7b70; font-size:10px; }
+.perfil-metrica .perfil-tiempo { font-size:23px; }
+.perfil-dos-columnas { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,.85fr); gap:16px; margin-top:28px; }
+.perfil-panel { padding:20px; border:1px solid #263128; border-radius:10px; background:#101711; }
+.perfil-panel .perfil-seccion-titulo { align-items:center; }
+.perfil-tabla-wrap { overflow-x:auto; }
+.perfil-tabla { width:100%; border-collapse:collapse; text-align:left; white-space:nowrap; }
+.perfil-tabla th { padding:11px 9px; color:#68756a; font-size:9px; font-weight:600; letter-spacing:.07em; }
+.perfil-tabla td { padding:12px 9px; border-top:1px solid rgba(255,255,255,.055); color:#aeb9af; font-size:11px; }
+.perfil-tabla td strong { color:var(--verde); font-weight:700; }
+.perfil-vacio { padding:24px 4px; color:#7e8b80; font-size:12px; line-height:1.6; }
+.perfil-ranking { margin:0; padding:0; list-style:none; }
+.perfil-ranking li { display:flex; align-items:center; gap:10px; padding:12px 3px; border-bottom:1px solid rgba(255,255,255,.055); }
+.perfil-ranking-pos { width:25px; color:#778379; font-size:11px; font-variant-numeric:tabular-nums; }
+.perfil-ranking-nombre { flex:1; overflow:hidden; color:#c4cec5; font-size:11px; text-overflow:ellipsis; white-space:nowrap; }
+.perfil-ranking li > strong { color:var(--verde); font-size:12px; }
+.perfil-ranking li > strong small { color:#758078; font-size:9px; }
+.perfil-ranking .perfil-ranking-actual { padding-right:8px; padding-left:8px; border-radius:5px; background:rgba(182,255,0,.07); }
+.perfil-posicion { display:flex; align-items:center; justify-content:space-between; margin-top:16px; padding:13px 12px; border:1px solid rgba(182,255,0,.18); border-radius:7px; background:rgba(182,255,0,.045); }
+.perfil-posicion span { color:#89958b; font-size:10px; letter-spacing:.08em; }
+.perfil-posicion strong { color:var(--verde); font-size:14px; }
+.perfil-nota { margin:20px 0 0; color:#69756b; font-size:10px; line-height:1.6; }
+.perfil-mensaje { padding:36px 20px; border:1px solid #263128; border-radius:9px; color:#9ba79d; background:#111812; font-size:13px; }
+.perfil-error { color:#ff8b9a; }
+@media (max-width:980px) {
+  .perfil-metricas { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .perfil-dos-columnas { grid-template-columns:1fr; }
+}
+@media (max-width:600px) {
+  .perfil-topbar,.perfil-contenido { width:calc(100% - 28px); }
+  .perfil-topbar { align-items:flex-start; gap:8px; }
+  .perfil-topbar .topbar-derecha { flex-wrap:wrap; justify-content:flex-end; gap:8px; }
+  .perfil-contenido { padding:28px 0 42px; }
+  .perfil-intro { align-items:flex-start; gap:13px; margin-bottom:28px; }
+  .perfil-avatar { width:52px; height:52px; flex-basis:52px; font-size:22px; }
+  .perfil-metricas { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .perfil-metrica { min-height:112px; padding:13px 11px; }
+  .perfil-metrica > span { font-size:8px; }
+  .perfil-metrica strong { margin-top:14px; font-size:30px; }
+  .perfil-panel { padding:14px 11px; }
+  .perfil-seccion-titulo { align-items:flex-start; flex-direction:column; gap:5px; }
+  .perfil-seccion-titulo > span { white-space:normal; }
+  .perfil-tabla th,.perfil-tabla td { padding:10px 7px; }
+}
