@@ -1375,3 +1375,41 @@ html, body, #root { min-height: 100%; }
   .perfil-seccion-titulo > span { white-space:normal; }
   .perfil-tabla th,.perfil-tabla td { padding:10px 7px; }
 }
+
+
+/* Ajustes minimalistas solicitados para la cabecera del perfil. */
+.perfil-topbar { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }
+.perfil-titulo { margin:0; color:#e9eee9; font-size:13px; font-weight:650; letter-spacing:.16em; }
+.perfil-topbar .topbar-derecha { justify-self:end; }
+.usuario-chip-perfil { cursor:pointer; font:inherit; letter-spacing:inherit; background:transparent; transition:border-color .18s,color .18s; }
+.usuario-chip-perfil:hover { border-color:var(--verde); color:#e7ffb0; }
+.perfil-contenido { padding-top:26px; }
+.perfil-intro { display:none; }
+.perfil-actividad-grid { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(250px,.75fr); gap:14px; margin-top:20px; }
+.perfil-grafica-wrap { padding-top:2px; }
+.perfil-grafica-resumen { display:flex; align-items:baseline; gap:10px; }
+.perfil-grafica-resumen strong { color:var(--verde); font-size:23px; font-variant-numeric:tabular-nums; }
+.perfil-grafica-resumen small { font-size:10px; }
+.perfil-grafica-resumen span { color:#778379; font-size:10px; }
+.perfil-grafica { display:block; width:100%; height:150px; overflow:visible; margin-top:8px; }
+.perfil-grafica-fechas { display:flex; justify-content:space-between; color:#69756b; font-size:9px; }
+.perfil-calendario-mes { margin:0 0 12px; color:#dce5dc; font-size:12px; text-transform:capitalize; }
+.perfil-calendario-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px; }
+.perfil-dia-semana,.perfil-dia,.perfil-dia-vacio { display:grid; place-items:center; aspect-ratio:1; min-width:0; border-radius:5px; }
+.perfil-dia-semana { color:#69756b; font-size:9px; }
+.perfil-dia { color:#aab5ab; background:rgba(255,255,255,.035); font-size:10px; }
+.perfil-dia-activo { color:#cfff70; background:rgba(182,255,0,.17); box-shadow:inset 0 0 0 1px rgba(182,255,0,.22); }
+.perfil-dia-hoy { outline:1px solid #dce9d4; outline-offset:1px; }
+.perfil-calendario-leyenda { display:flex; align-items:center; gap:7px; margin-top:13px; color:#7c897e; font-size:9px; }
+.perfil-calendario-leyenda i { width:7px; height:7px; border-radius:2px; background:var(--verde); }
+.perfil-calendario-leyenda span { margin-left:auto; color:#68756b; }
+@media (max-width:900px) {
+  .perfil-actividad-grid { grid-template-columns:1fr; }
+}
+@media (max-width:600px) {
+  .perfil-topbar { grid-template-columns:auto 1fr; row-gap:10px; }
+  .perfil-titulo { justify-self:end; }
+  .perfil-topbar .topbar-derecha { grid-column:1/-1; justify-self:stretch; }
+  .perfil-grafica { height:120px; }
+  .perfil-calendario-grid { gap:4px; }
+}
