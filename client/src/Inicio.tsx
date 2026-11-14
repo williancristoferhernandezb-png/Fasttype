@@ -15,8 +15,7 @@ export default function Inicio({ usuario, onLecciones, onLibre, onPerfil, onSali
         </a>
         <div className="topbar-derecha">
           <span className="estado-online"><i /> SISTEMA ACTIVO</span>
-          <button className="boton-texto boton-perfil" onClick={onPerfil}>Mi perfil <span>↗</span></button>
-          <span className="usuario-chip">{usuario}</span>
+          <button className="usuario-chip usuario-chip-perfil" onClick={onPerfil} title="Abrir perfil" aria-label={`Abrir perfil de ${usuario}`}>{usuario}</button>
           <button className="boton-salir" onClick={onSalir}>Salir</button>
         </div>
       </header>
