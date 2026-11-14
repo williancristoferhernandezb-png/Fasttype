@@ -155,3 +155,18 @@ export async function pedirRankingPerfil(): Promise<EntradaRanking[]> {
   const res = await fetch(`${API}/resultados/ranking`);
   return respuestaAuth<EntradaRanking[]>(res);
 }
+
+
+export type ActividadDiaria = {
+  fecha: string;
+  practicas: number;
+  promedio_wpm: number;
+  mejor_wpm: number;
+};
+
+export async function pedirActividadPerfil(): Promise<ActividadDiaria[]> {
+  const res = await fetch(`${API}/resultados/actividad`, {
+    credentials: "include",
+  });
+  return respuestaAuth<ActividadDiaria[]>(res);
+}
