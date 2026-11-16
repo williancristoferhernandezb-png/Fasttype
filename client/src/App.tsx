@@ -65,13 +65,19 @@ function codigoTeclaEsperada(caracter: string): string | null {
 }
 
 
-function textoAleatorio() {
-  return TEXTOS[Math.floor(Math.random() * TEXTOS.length)];
+function textoAleatorio(categorias: CategoriaPractica[]) {
+  const disponibles: string[] = [];
+  if (categorias.includes("letras")) disponibles.push(...TEXTOS);
+  if (categorias.includes("puntuacion")) disponibles.push(...TEXTOS_PUNTUACION);
+  if (categorias.includes("numeros")) disponibles.push(...TEXTOS_NUMEROS);
+  if (categorias.includes("operaciones")) disponibles.push(...TEXTOS_OPERACIONES);
+  const lista = disponibles.length ? disponibles : TEXTOS;
+  return lista[Math.floor(Math.random() * lista.length)];
 }
 
-function generarTexto(longitud: number) {
+function generarTexto(longitud: number, categorias: CategoriaPractica[]) {
   let resultado = "";
-  while (resultado.length < longitud) resultado += (resultado ? " " : "") + textoAleatorio();
+  while (resultado.length < longitud) resultado += (resultado ? " " : "") + textoAleatorio(categorias);
   return resultado;
 }
 
