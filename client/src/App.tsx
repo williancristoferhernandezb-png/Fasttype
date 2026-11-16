@@ -22,7 +22,30 @@ const TEXTOS = [
 ];
 const DURACION = 30;
 type TeclaReinicio = "Tab" | "Control" | "Shift";
+
 const DURACIONES = [15, 30, 60] as const;
+type CategoriaPractica = "letras" | "puntuacion" | "numeros" | "operaciones";
+const CATEGORIAS: { id: CategoriaPractica; nombre: string }[] = [
+  { id: "letras", nombre: "Letras" },
+  { id: "puntuacion", nombre: "Letras + puntuación" },
+  { id: "numeros", nombre: "Números" },
+  { id: "operaciones", nombre: "Números + operaciones" },
+];
+const TEXTOS_PUNTUACION = [
+  "¿cómo estás? espero que todo vaya bien; hoy tenemos una nueva oportunidad para aprender.",
+  "la práctica constante es importante: cada intento cuenta, cada error enseña y cada mejora suma.",
+  "¿cuál es tu objetivo? escribir con calma, mantener la precisión y aumentar la velocidad.",
+];
+const TEXTOS_NUMEROS = [
+  "en 2026 tenemos 12 meses, 52 semanas y 365 días para alcanzar nuevas metas.",
+  "el equipo registró 24 sesiones, 18 ejercicios y 96 minutos de práctica.",
+  "cada grupo tiene 5 personas, 10 tareas y 30 minutos para completar el ejercicio.",
+];
+const TEXTOS_OPERACIONES = [
+  "12 + 8 = 20; 30 - 12 = 18; 6 * 7 = 42; 81 / 9 = 9.",
+  "15 + 25 = 40; 90 - 35 = 55; 8 * 8 = 64; 72 / 8 = 9.",
+  "100 - 45 = 55; 14 + 16 = 30; 9 * 5 = 45; 63 / 7 = 9.",
+];
 
 function codigoTeclaEsperada(caracter: string): string | null {
   if (caracter === " ") return "Space";
