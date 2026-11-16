@@ -89,10 +89,10 @@ const FILAS_TECLADO: { codigo: string; etiqueta: string }[][] = [
 
 function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
   const mapa = new Map(datos.map(t => [t.codigo,t]));
-  const clase = (t?: ConfianzaTecla) => !t ? "sin-datos" : t.precision >= 95 ? "dominio-alto" : t.precision >= 80 ? "dominio-medio" : "dominio-bajo";
+  const clase = (t?: ConfianzaTecla) => !t || t.intentos < 5 ? "sin-datos" : t.precision >= 95 ? "dominio-alto" : t.precision >= 80 ? "dominio-medio" : "dominio-bajo";
   const tecla = (codigo: string, etiqueta: string) => {
     const t = mapa.get(codigo);
-    const texto = t ? `${t.etiqueta} · ${t.precision}% · ${t.intentos} intentos` : `${etiqueta} · Sin datos`;
+    const texto = t ? `${t.etiqueta} · ${t.precision}% · ${t.intentos} intentos` : `${etiqueta} · Datos insuficientes`;
     return <span key={codigo} title={texto} aria-label={texto} className={`confianza-tecla ${clase(t)}`}>{t?.etiqueta ?? etiqueta}</span>;
   };
   return (
