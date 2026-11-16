@@ -83,6 +83,7 @@ function generarTexto(longitud: number, categorias: CategoriaPractica[]) {
 
 function SelectorCategorias({ categorias, onChange }: { categorias: CategoriaPractica[]; onChange: (categorias: CategoriaPractica[]) => void }) {
   function alternar(id: CategoriaPractica) {
+    if (categorias.includes(id) && categorias.length === 1) return;
     onChange(categorias.includes(id) ? categorias.filter((x) => x !== id) : [...categorias, id]);
   }
   const resumen = categorias.length === 0 ? "Elegir contenido" : categorias.map((id) => CATEGORIAS.find((x) => x.id === id)?.nombre).filter(Boolean).join(" + ");
