@@ -87,6 +87,13 @@ const FILAS_TECLADO: { codigo: string; etiqueta: string }[][] = [
   ["KeyZ","KeyX","KeyC","KeyV","KeyB","KeyN","KeyM","Comma","Period","Slash"].map((codigo,i)=>({codigo,etiqueta:["Z","X","C","V","B","N","M",",",".","-"][i]})),
 ];
 
+const FILAS_NUMPAD: { codigo: string; etiqueta: string }[][] = [
+  ["Numpad7","Numpad8","Numpad9"].map((codigo,i)=>({codigo,etiqueta:String(i+7)})),
+  ["Numpad4","Numpad5","Numpad6"].map((codigo,i)=>({codigo,etiqueta:String(i+4)})),
+  ["Numpad1","Numpad2","Numpad3"].map((codigo,i)=>({codigo,etiqueta:String(i+1)})),
+  ["Numpad0","NumpadDecimal","NumpadAdd","NumpadSubtract","NumpadMultiply","NumpadDivide"].map((codigo,i)=>({codigo,etiqueta:["0",".","+","−","×","÷"][i]})),
+];
+
 function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
   const mapa = new Map(datos.map(t => [t.codigo,t]));
   const clase = (t?: ConfianzaTecla) => !t ? "sin-datos" : t.intentos < 10 ? "muestra-inicial" : t.precision >= 95 ? "dominio-alto" : t.precision >= 80 ? "dominio-medio" : "dominio-bajo";
@@ -98,6 +105,8 @@ function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
   return (
     <div className="confianza-teclado">
       {FILAS_TECLADO.map((fila,i)=><div className={`confianza-fila confianza-fila-${i}`} key={i}>{fila.map(k=>tecla(k.codigo,k.etiqueta))}</div>)}
+      <div className="confianza-subtitulo">TECLADO NUMÉRICO</div>
+      {FILAS_NUMPAD.map((fila,i)=><div className={`confianza-fila confianza-fila-numpad confianza-fila-numpad-${i}`} key={`n${i}`}>{fila.map(k=>tecla(k.codigo,k.etiqueta))}</div>)}
       <div className="confianza-fila confianza-fila-espacio">{tecla("Space","ESPACIO")}</div>
       <div className="confianza-leyenda">
         <span><i className="dominio-alto"/>Dominada · 95–100%</span>
