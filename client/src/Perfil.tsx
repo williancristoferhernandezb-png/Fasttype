@@ -123,7 +123,8 @@ export default function Perfil({ usuario, onInicio, onSalir }: Props) {
   const [resumen, setResumen] = useState<ResumenPerfil | null>(null);
   const [historial, setHistorial] = useState<ResultadoPractica[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
-  const [actividad, setActividad] = useState<ActividadDiaria[]>([]);\n  const [confianza, setConfianza] = useState<ConfianzaTecla[]>([]);
+  const [actividad, setActividad] = useState<ActividadDiaria[]>([]);
+  const [confianza, setConfianza] = useState<ConfianzaTecla[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
