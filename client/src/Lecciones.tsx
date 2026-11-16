@@ -297,7 +297,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       if (codigo === "Space") {
         e.preventDefault();
         e.stopPropagation();
-        if (!terminado) manejarEscritura(escrito + " ");
+        if (!terminado) { registrarTecla("Space", "ESP", " "); manejarEscritura(escrito + " "); }
         return;
       }
 
@@ -376,7 +376,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
   return (
     <div className="leccion-activa pantalla-entrenamiento" style={estiloEscritura(fuente, tamano)}>
       <div className="leccion-cabecera">
-        <button className="boton-texto" onClick={() => setActual(null)}>← LECCIONES</button>
+        <button className="boton-texto" onClick={() => { guardarConfianzaActual(); setActual(null); }}>← LECCIONES</button>
         <div className="leccion-titulo-control"><strong>{leccion.titulo}</strong><span>LECCIÓN {String(actual! + 1).padStart(2, "0")} / {String(lecciones.length).padStart(2, "0")}</span></div>
         <div className="leccion-controles">
           <span className="leccion-cronometro">{tiempoVisible}</span>
