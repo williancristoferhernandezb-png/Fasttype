@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { CURSOS, type Modo } from "./curriculo";
 import Teclado from "./Teclado";
 import ControlesTexto, { estiloEscritura, type FuenteEscritura } from "./ControlesTexto";
+import { guardarConfianzaTeclas, type RegistroConfianzaTecla } from "./api";
 
 const META = 90;
 
@@ -69,6 +70,8 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
   const inputRef = useRef<HTMLInputElement>(null);
   const inicioRef = useRef<number | null>(null);
   const intentoGuardadoRef = useRef<string>("");
+  const confianzaTeclasRef = useRef<Record<string, RegistroConfianzaTecla>>({});
+  const confianzaGuardadaRef = useRef(false);
   const [tiempoMs, setTiempoMs] = useState(0);
   const [teclaReinicio, setTeclaReinicio] = useState<"Tab" | "Control" | "Shift">(() => {
     const v = localStorage.getItem("fasttype_tecla_reinicio");
@@ -108,6 +111,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     setTiempoMs(duracion);
     const wpmFinal = Math.round((correctos / 5) / (duracion / 60000));
     const registro = { leccionId: leccion.id, titulo: leccion.titulo, curso, fecha: new Date().toISOString(), duracionMs: duracion, wpm: wpmFinal, precision };
+    guardarConfianzaActual();
     try {
       const key = "fasttype_lecciones_" + usuario;
       const anteriores = JSON.parse(localStorage.getItem(key) || "[]");
@@ -115,6 +119,23 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       localStorage.setItem(key, JSON.stringify(anteriores.slice(-500)));
     } catch (error) { console.warn("No se pudo guardar el tiempo de la lección:", error); }
   }, [terminado, escrito.length]);
+
+  function guardarConfianzaActual() {
+    if (confianzaGuardadaRef.current) return;
+    const teclas = Object.values(confianzaTeclasRef.current).filter(t => t.intentos > 0);
+    if (!teclas.length) return;
+    confianzaGuardadaRef.current = true;
+    guardarConfianzaTeclas(teclas).catch(error => console.error("No se pudo guardar la precisión por tecla:", error));
+  }
+
+  function registrarTecla(codigo: string, etiqueta: string, caracter: string) {
+    if (!codigo || codigo === "Unidentified") return;
+    const registro = confianzaTeclasRef.current[codigo] ?? { codigo, etiqueta, aciertos: 0, intentos: 0 };
+    registro.etiqueta = etiqueta;
+    registro.intentos += 1;
+    if (caracter === leccion?.texto[escrito.length]) registro.aciertos += 1;
+    confianzaTeclasRef.current[codigo] = registro;
+  }
 
   function manejarEscritura(valor: string) {
     if (!leccion || terminado) return;
@@ -219,7 +240,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       if (teclasUS) {
         e.preventDefault();
         e.stopPropagation();
-        if (!terminado) manejarEscritura(escrito + teclasUS[e.shiftKey ? 1 : 0]);
+        if (!terminado) { const caracter = teclasUS[e.shiftKey ? 1 : 0]; registrarTecla(e.code, caracter.toUpperCase(), caracter); manejarEscritura(escrito + caracter); }
         return;
       }
       if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
