@@ -150,7 +150,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     guardarConfianzaTeclas(teclas).catch(error => console.error("No se pudo guardar la precisión por tecla:", error));
   }
 
-  function registrarTecla(codigoPulsado: string, etiqueta: string, caracter: string) {
+  function registrarTecla(codigoPulsado: string, _etiqueta: string, caracter: string) {
     if (!codigoPulsado || codigoPulsado === "Unidentified" || !leccion) return;
     const esperado = leccion.texto[escrito.length];
     const codigoBase = codigoTeclaEsperada(esperado, curso);
