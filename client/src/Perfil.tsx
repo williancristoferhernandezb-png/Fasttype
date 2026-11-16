@@ -108,7 +108,8 @@ function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
     </div>
   );
 }
-\nexport default function Perfil({ usuario, onInicio, onSalir }: Props) {
+
+export default function Perfil({ usuario, onInicio, onSalir }: Props) {
   const [resumen, setResumen] = useState<ResumenPerfil | null>(null);
   const [historial, setHistorial] = useState<ResultadoPractica[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
