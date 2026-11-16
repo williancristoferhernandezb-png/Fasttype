@@ -170,3 +170,36 @@ export async function pedirActividadPerfil(): Promise<ActividadDiaria[]> {
   });
   return respuestaAuth<ActividadDiaria[]>(res);
 }
+
+
+export type ConfianzaTecla = {
+  codigo: string;
+  etiqueta: string;
+  aciertos: number;
+  intentos: number;
+  precision: number;
+};
+
+export type RegistroConfianzaTecla = {
+  codigo: string;
+  etiqueta: string;
+  aciertos: number;
+  intentos: number;
+};
+
+export async function guardarConfianzaTeclas(teclas: RegistroConfianzaTecla[]) {
+  const res = await fetch(`${API}/resultados/teclas`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ teclas }),
+  });
+  return respuestaAuth<{ guardadas: number }>(res);
+}
+
+export async function pedirConfianzaTeclas(): Promise<ConfianzaTecla[]> {
+  const res = await fetch(`${API}/resultados/teclas`, {
+    credentials: "include",
+  });
+  return respuestaAuth<ConfianzaTecla[]>(res);
+}
