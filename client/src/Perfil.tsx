@@ -89,10 +89,10 @@ const FILAS_TECLADO: { codigo: string; etiqueta: string }[][] = [
 
 function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
   const mapa = new Map(datos.map(t => [t.codigo,t]));
-  const clase = (t?: ConfianzaTecla) => !t ? "sin-datos" : t.precision >= 95 ? "dominio-alto" : t.precision >= 80 ? "dominio-medio" : "dominio-bajo";
+  const clase = (t?: ConfianzaTecla) => !t ? "sin-datos" : t.intentos < 10 ? "muestra-inicial" : t.precision >= 95 ? "dominio-alto" : t.precision >= 80 ? "dominio-medio" : "dominio-bajo";
   const tecla = (codigo: string, etiqueta: string) => {
     const t = mapa.get(codigo);
-    const texto = t ? `${t.etiqueta} · ${t.precision}% · ${t.intentos} intentos` : `${etiqueta} · Sin datos`;
+    const texto = t ? `${t.etiqueta} · ${t.aciertos}/${t.intentos} aciertos · ${t.precision}%${t.intentos < 10 ? " · muestra inicial" : ""}` : `${etiqueta} · Sin datos`;
     return <span key={codigo} title={texto} aria-label={texto} className={`confianza-tecla ${clase(t)}`}>{t?.etiqueta ?? etiqueta}</span>;
   };
   return (
@@ -103,6 +103,7 @@ function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
         <span><i className="dominio-alto"/>Dominada · 95–100%</span>
         <span><i className="dominio-medio"/>En progreso · 80–94%</span>
         <span><i className="dominio-bajo"/>Necesita práctica · 0–79%</span>
+        <span><i className="muestra-inicial"/>Muestra inicial · menos de 10 intentos</span>
         <span><i className="sin-datos"/>Sin datos</span>
       </div>
     </div>
