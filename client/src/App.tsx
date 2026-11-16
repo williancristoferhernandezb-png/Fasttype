@@ -9,6 +9,7 @@ import {
   obtenerSesion,
   cerrarSesion,
   guardarResultado,
+  guardarConfianzaTeclas,
   pedirHistorial,
   pedirRanking,
 } from "./api";
@@ -58,6 +59,8 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   const [historial, setHistorial] = useState<{ id: number; wpm: number; precision: number; creado_en: string }[]>([]);
   const [ranking, setRanking] = useState<{ nombre: string; mejor_wpm: number }[]>([]);
   const guardadoRef = useRef(false);
+  const guardadoTeclasRef = useRef(false);
+  const confianzaTeclasRef = useRef<Record<string, { etiqueta: string; aciertos: number; intentos: number }>>({});
 
   useEffect(() => {
     let activo = true;
@@ -82,6 +85,8 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
     setTranscurrido(0);
     setIniciado(false);
     guardadoRef.current = false;
+    guardadoTeclasRef.current = false;
+    confianzaTeclasRef.current = {};
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
@@ -124,6 +129,13 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
       .catch(() => {});
   }, [terminado, escrito.length, wpm, precision, segundosUsados]);
 
+  useEffect(() => {
+    if (!terminado || guardadoTeclasRef.current || escrito.length === 0) return;
+    guardadoTeclasRef.current = true;
+    const teclas = Object.entries(confianzaTeclasRef.current).map(([codigo, t]) => ({ codigo, ...t }));
+    if (teclas.length) guardarConfianzaTeclas(teclas).catch(() => {});
+  }, [terminado, escrito.length]);
+
   function manejarCambio(e: React.ChangeEvent<HTMLInputElement>) {
     if (terminado) return;
     if (!iniciado) setIniciado(true);
@@ -136,6 +148,15 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   }
 
   function manejarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!terminado && iniciado && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
+      const codigo = e.code;
+      const etiqueta = e.key === " " ? "ESP" : e.key.toLocaleUpperCase().slice(0, 4);
+      const registro = confianzaTeclasRef.current[codigo] ?? { etiqueta, aciertos: 0, intentos: 0 };
+      registro.etiqueta = etiqueta;
+      registro.intentos += 1;
+      if (e.key === texto[escrito.length]) registro.aciertos += 1;
+      confianzaTeclasRef.current[codigo] = registro;
+    }
     const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
       : teclaReinicio === "Shift" ? e.key === "Shift"
       : e.key === "Control" && !e.altKey && !e.metaKey;
