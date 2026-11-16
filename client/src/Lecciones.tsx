@@ -153,7 +153,8 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
   function registrarTecla(codigoPulsado: string, etiqueta: string, caracter: string) {
     if (!codigoPulsado || codigoPulsado === "Unidentified" || !leccion) return;
     const esperado = leccion.texto[escrito.length];
-    const codigo = codigoTeclaEsperada(esperado, curso);
+    const codigoBase = codigoTeclaEsperada(esperado, curso);
+    const codigo = caracter === esperado && curso !== "numpad" && codigoPulsado.startsWith("Numpad") ? codigoPulsado : codigoBase;
     if (!codigo) return;
     const registro = confianzaTeclasRef.current[codigo] ?? { codigo, etiqueta: esperado === " " ? "ESP" : esperado.toLocaleUpperCase(), aciertos: 0, intentos: 0 };
     registro.etiqueta = esperado === " " ? "ESP" : esperado.toLocaleUpperCase();
