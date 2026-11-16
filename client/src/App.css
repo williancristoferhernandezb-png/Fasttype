@@ -1471,3 +1471,19 @@ html, body, #root { min-height: 100%; }
 .opcion-practica input { accent-color:var(--verde); }
 .configuracion-practica .boton-principal:disabled { opacity:.4; cursor:not-allowed; }
 @media (max-width:560px) { .opciones-practica { grid-template-columns:1fr; } }
+
+
+.selector-categorias-nav { position:relative; z-index:20; align-self:center; }
+.selector-categorias-nav summary { display:flex; align-items:center; gap:8px; list-style:none; cursor:pointer; padding:8px 10px; border:1px solid var(--borde); border-radius:6px; color:#cbd3cb; font-size:11px; }
+.selector-categorias-nav summary::-webkit-details-marker { display:none; }
+.selector-categorias-nav summary span { color:var(--verde); letter-spacing:.08em; }
+.selector-categorias-nav summary b { max-width:190px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:500; }
+.selector-categorias-nav summary i { font-style:normal; color:var(--verde); }
+.selector-categorias-menu { position:absolute; top:calc(100% + 7px); left:0; min-width:220px; padding:8px; display:grid; gap:3px; background:#151b16; border:1px solid var(--borde); border-radius:7px; box-shadow:0 12px 28px #0008; }
+.selector-categorias-menu label { display:flex; align-items:center; gap:9px; padding:9px 8px; border-radius:4px; color:#d8dfd7; font-size:12px; cursor:pointer; }
+.selector-categorias-menu label:hover { background:#202a21; }
+.selector-categorias-menu input { accent-color:var(--verde); }
+@media (max-width:700px) {
+  .selector-categorias-nav { order:4; }
+  .selector-categorias-nav summary b { max-width:130px; }
+}
