@@ -37,9 +37,9 @@ const TEXTOS_PUNTUACION = [
   "¿cuál es tu objetivo? escribir con calma, mantener la precisión y aumentar la velocidad.",
 ];
 const TEXTOS_NUMEROS = [
-  "en 2026 tenemos 12 meses, 52 semanas y 365 días para alcanzar nuevas metas.",
-  "el equipo registró 24 sesiones, 18 ejercicios y 96 minutos de práctica.",
-  "cada grupo tiene 5 personas, 10 tareas y 30 minutos para completar el ejercicio.",
+  "2026 12 52 365 24 18 96 5 10 30 7 14 21 28 100 250 500 1000",
+  "12345 67890 24680 13579 112233 445566 778899 2026 2027 2028",
+  "15 30 45 60 75 90 105 120 150 180 210 240 300 360 480 600",
 ];
 const TEXTOS_OPERACIONES = [
   "12 + 8 = 20; 30 - 12 = 18; 6 * 7 = 42; 81 / 9 = 9.",
