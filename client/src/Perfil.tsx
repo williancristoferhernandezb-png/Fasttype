@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
-  pedirResumenPerfil, pedirHistorialPerfil, pedirRankingPerfil, pedirActividadPerfil,
-  type ResumenPerfil, type ResultadoPractica, type EntradaRanking, type ActividadDiaria,
+  pedirResumenPerfil, pedirHistorialPerfil, pedirRankingPerfil, pedirActividadPerfil, pedirConfianzaTeclas,
+  type ResumenPerfil, type ResultadoPractica, type EntradaRanking, type ActividadDiaria, type ConfianzaTecla,
 } from "./api";
 
 type Props = { usuario: string; onInicio: () => void; onSalir: () => void };
@@ -79,20 +79,49 @@ function CalendarioActividad({ actividad }: { actividad: ActividadDiaria[] }) {
   );
 }
 
-export default function Perfil({ usuario, onInicio, onSalir }: Props) {
+
+const FILAS_TECLADO: { codigo: string; etiqueta: string }[][] = [
+  ["Backquote","Digit1","Digit2","Digit3","Digit4","Digit5","Digit6","Digit7","Digit8","Digit9","Digit0","Minus","Equal"].map((codigo,i)=>({codigo,etiqueta:["º","1","2","3","4","5","6","7","8","9","0","'","+"][i]})),
+  ["KeyQ","KeyW","KeyE","KeyR","KeyT","KeyY","KeyU","KeyI","KeyO","KeyP","BracketLeft","BracketRight"].map((codigo,i)=>({codigo,etiqueta:["Q","W","E","R","T","Y","U","I","O","P","´","+"][i]})),
+  ["KeyA","KeyS","KeyD","KeyF","KeyG","KeyH","KeyJ","KeyK","KeyL","Semicolon","Quote"].map((codigo,i)=>({codigo,etiqueta:["A","S","D","F","G","H","J","K","L","Ñ","´"][i]})),
+  ["KeyZ","KeyX","KeyC","KeyV","KeyB","KeyN","KeyM","Comma","Period","Slash"].map((codigo,i)=>({codigo,etiqueta:["Z","X","C","V","B","N","M",",",".","-"][i]})),
+];
+
+function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
+  const mapa = new Map(datos.map(t => [t.codigo,t]));
+  const clase = (t?: ConfianzaTecla) => !t ? "sin-datos" : t.precision >= 95 ? "dominio-alto" : t.precision >= 80 ? "dominio-medio" : "dominio-bajo";
+  const tecla = (codigo: string, etiqueta: string) => {
+    const t = mapa.get(codigo);
+    const texto = t ? `${t.etiqueta} · ${t.precision}% · ${t.intentos} intentos` : `${etiqueta} · Sin datos`;
+    return <span key={codigo} title={texto} aria-label={texto} className={`confianza-tecla ${clase(t)}`}>{t?.etiqueta ?? etiqueta}</span>;
+  };
+  return (
+    <div className="confianza-teclado">
+      {FILAS_TECLADO.map((fila,i)=><div className={`confianza-fila confianza-fila-${i}`} key={i}>{fila.map(k=>tecla(k.codigo,k.etiqueta))}</div>)}
+      <div className="confianza-fila confianza-fila-espacio">{tecla("Space","ESPACIO")}</div>
+      <div className="confianza-leyenda">
+        <span><i className="dominio-alto"/>Dominada · 95–100%</span>
+        <span><i className="dominio-medio"/>En progreso · 80–94%</span>
+        <span><i className="dominio-bajo"/>Necesita práctica · 0–79%</span>
+        <span><i className="sin-datos"/>Sin datos</span>
+      </div>
+    </div>
+  );
+}
+\nexport default function Perfil({ usuario, onInicio, onSalir }: Props) {
   const [resumen, setResumen] = useState<ResumenPerfil | null>(null);
   const [historial, setHistorial] = useState<ResultadoPractica[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
-  const [actividad, setActividad] = useState<ActividadDiaria[]>([]);
+  const [actividad, setActividad] = useState<ActividadDiaria[]>([]);\n  const [confianza, setConfianza] = useState<ConfianzaTecla[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let activo = true;
-    Promise.all([pedirResumenPerfil(), pedirHistorialPerfil(), pedirRankingPerfil(), pedirActividadPerfil()])
-      .then(([r,h,g,a]) => {
+    Promise.all([pedirResumenPerfil(), pedirHistorialPerfil(), pedirRankingPerfil(), pedirActividadPerfil(), pedirConfianzaTeclas()])
+      .then(([r,h,g,a,t]) => {
         if (!activo) return;
-        setResumen(r); setHistorial(h); setRanking(g); setActividad(a);
+        setResumen(r); setHistorial(h); setRanking(g); setActividad(a); setConfianza(t);
       })
       .catch((e: unknown) => {
         if (activo) setError(e instanceof Error ? e.message : "No se pudieron cargar las estadísticas.");
@@ -141,9 +170,15 @@ export default function Perfil({ usuario, onInicio, onSalir }: Props) {
             </section>
           </div>
 
+          <section className="perfil-seccion perfil-panel perfil-panel-confianza">
+            <div className="perfil-seccion-titulo"><div><p className="eyebrow">04 / TÉCNICA</p><h2>KEYBOARD CONFIDENCE</h2></div><span>Precisión por tecla · pruebas libres</span></div>
+            <TecladoConfianza datos={confianza}/>
+            <p className="perfil-confianza-nota">Cada tecla refleja los aciertos frente a sus intentos registrados. Practica más para completar el mapa.</p>
+          </section>
+
           <div className="perfil-dos-columnas">
             <section className="perfil-seccion perfil-panel">
-              <div className="perfil-seccion-titulo"><div><p className="eyebrow">04 / ACTIVIDAD</p><h2>HISTORIAL RECIENTE</h2></div><span>Últimas 50 pruebas</span></div>
+              <div className="perfil-seccion-titulo"><div><p className="eyebrow">05 / ACTIVIDAD</p><h2>HISTORIAL RECIENTE</h2></div><span>Últimas 50 pruebas</span></div>
               {historial.length === 0 ? <p className="perfil-vacio">Aún no tienes pruebas registradas. Completa una prueba libre para comenzar tu historial.</p> :
                 <div className="perfil-tabla-wrap"><table className="perfil-tabla">
                   <thead><tr><th>FECHA</th><th>VELOCIDAD</th><th>PRECISIÓN</th><th>DURACIÓN</th></tr></thead>
@@ -151,7 +186,7 @@ export default function Perfil({ usuario, onInicio, onSalir }: Props) {
                 </table></div>}
             </section>
             <section className="perfil-seccion perfil-panel">
-              <div className="perfil-seccion-titulo"><div><p className="eyebrow">05 / GLOBAL</p><h2>RANKING</h2></div><span>Top 10 · mejor PPM</span></div>
+              <div className="perfil-seccion-titulo"><div><p className="eyebrow">06 / GLOBAL</p><h2>RANKING</h2></div><span>Top 10 · mejor PPM</span></div>
               {ranking.length === 0 ? <p className="perfil-vacio">El ranking todavía no tiene resultados.</p> :
                 <ol className="perfil-ranking">{ranking.map((r,i)=><li key={r.nombre} className={r.nombre===usuario?"perfil-ranking-actual":""}><span className="perfil-ranking-pos">#{i+1}</span><span className="perfil-ranking-nombre">{r.nombre}{r.nombre===usuario?" · Tú":""}</span><strong>{r.mejor_wpm} <small>PPM</small></strong></li>)}</ol>}
               <div className="perfil-posicion"><span>TU POSICIÓN</span><strong>{posicion>=0?`#${posicion+1}`:"Fuera del top 10"}</strong></div>
