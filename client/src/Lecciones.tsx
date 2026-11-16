@@ -233,7 +233,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       if (e.code === "Space") {
         e.preventDefault();
         e.stopPropagation();
-        if (!terminado) manejarEscritura(escrito + " ");
+        if (!terminado) { registrarTecla("Space", "ESP", " "); manejarEscritura(escrito + " "); }
         return;
       }
       const teclasUS = mapaUS[e.code];
@@ -290,7 +290,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       if (caracter !== undefined) {
         e.preventDefault();
         e.stopPropagation();
-        if (!terminado) manejarEscritura(escrito + caracter);
+        if (!terminado) { registrarTecla(codigo, caracter, caracter); manejarEscritura(escrito + caracter); }
         return;
       }
 
@@ -307,6 +307,12 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
         e.preventDefault();
         e.stopPropagation();
       }
+      return;
+    }
+
+    // En los demás cursos, registrar cada pulsación imprimible física.
+    if (!terminado && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      registrarTecla(e.code, e.key === " " ? "ESP" : e.key.toLocaleUpperCase(), e.key);
     }
   }
 
