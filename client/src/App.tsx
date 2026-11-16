@@ -81,6 +81,31 @@ function generarTexto(longitud: number, categorias: CategoriaPractica[]) {
   return resultado;
 }
 
+function ConfiguracionPractica({ onIniciar, onInicio }: { onIniciar: (categorias: CategoriaPractica[]) => void; onInicio: () => void }) {
+  const [seleccionadas, setSeleccionadas] = useState<CategoriaPractica[]>(["letras"]);
+  function alternar(id: CategoriaPractica) {
+    setSeleccionadas((actuales) => actuales.includes(id) ? actuales.filter((x) => x !== id) : [...actuales, id]);
+  }
+  return (
+    <section className="vista-contenido pantalla-entrenamiento configuracion-practica">
+      <div className="vista-cabecera">
+        <button className="boton-texto" onClick={onInicio}>← INICIO</button>
+        <h2>PRÁCTICA</h2>
+      </div>
+      <p className="lecciones-descripcion">Elige qué quieres practicar. Puedes combinar varias opciones.</p>
+      <div className="opciones-practica">
+        {CATEGORIAS.map((categoria) => (
+          <label key={categoria.id} className={seleccionadas.includes(categoria.id) ? "opcion-practica seleccionada" : "opcion-practica"}>
+            <input type="checkbox" checked={seleccionadas.includes(categoria.id)} onChange={() => alternar(categoria.id)} />
+            <span>{categoria.nombre}</span>
+          </label>
+        ))}
+      </div>
+      <button className="boton-principal" disabled={seleccionadas.length === 0} onClick={() => onIniciar(seleccionadas)}>COMENZAR <span>↗</span></button>
+    </section>
+  );
+}
+
 function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [duracion, setDuracion] = useState<number>(() => {
     const guardada = localStorage.getItem("fasttype_duracion_libre");
