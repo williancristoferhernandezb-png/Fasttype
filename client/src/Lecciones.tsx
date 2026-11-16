@@ -6,6 +6,28 @@ import { guardarConfianzaTeclas, type RegistroConfianzaTecla } from "./api";
 
 const META = 90;
 
+function codigoTeclaEsperada(caracter: string, curso?: string): string | null {
+  if (caracter === " ") return "Space";
+  if (/^[a-z]$/i.test(caracter)) return "Key" + caracter.toUpperCase();
+  if (/^\\d$/.test(caracter)) return curso === "numpad" ? "Numpad" + caracter : "Digit" + caracter;
+  const mapa: Record<string, string> = {
+    "ñ": "Semicolon", "Ñ": "Semicolon", ",": "Comma", ".": "Period",
+    "/": "Slash", "?": "Slash", ";": "Semicolon", ":": "Semicolon",
+    "'": "Quote", '"': "Quote', "[": "BracketLeft", "{": "BracketLeft",
+    "]": "BracketRight", "}": "BracketRight", "\\": "Backslash", "|": "Backslash",
+    "-": "Minus", "_": "Minus", "=": "Equal", "+": "Equal",
+    "`": "Backquote", "~": "Backquote", "!": "Digit1", "@": "Digit2",
+    "#": "Digit3", "$": "Digit4", "%": "Digit5", "^": "Digit6",
+    "&": "Digit7", "*": "Digit8", "(": "Digit9", ")": "Digit0",
+  };
+  if (curso === "numpad") {
+    const numerico: Record<string, string> = { ".": "NumpadDecimal", "+": "NumpadAdd", "-": "NumpadSubtract", "*": "NumpadMultiply", "/": "NumpadDivide" };
+    if (numerico[caracter]) return numerico[caracter];
+  }
+  return mapa[caracter] ?? null;
+}
+
+
 type Seccion = "alfa" | "numerica";
 type Variante = "numpad" | "fila";
 
@@ -128,12 +150,15 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     guardarConfianzaTeclas(teclas).catch(error => console.error("No se pudo guardar la precisión por tecla:", error));
   }
 
-  function registrarTecla(codigo: string, etiqueta: string, caracter: string) {
-    if (!codigo || codigo === "Unidentified") return;
-    const registro = confianzaTeclasRef.current[codigo] ?? { codigo, etiqueta, aciertos: 0, intentos: 0 };
-    registro.etiqueta = etiqueta;
+  function registrarTecla(codigoPulsado: string, etiqueta: string, caracter: string) {
+    if (!codigoPulsado || codigoPulsado === "Unidentified" || !leccion) return;
+    const esperado = leccion.texto[escrito.length];
+    const codigo = codigoTeclaEsperada(esperado, curso);
+    if (!codigo) return;
+    const registro = confianzaTeclasRef.current[codigo] ?? { codigo, etiqueta: esperado === " " ? "ESP" : esperado.toLocaleUpperCase(), aciertos: 0, intentos: 0 };
+    registro.etiqueta = esperado === " " ? "ESP" : esperado.toLocaleUpperCase();
     registro.intentos += 1;
-    if (caracter === leccion?.texto[escrito.length]) registro.aciertos += 1;
+    if (caracter === esperado && codigoPulsado === codigo) registro.aciertos += 1;
     confianzaTeclasRef.current[codigo] = registro;
   }
 
