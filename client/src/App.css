@@ -1444,3 +1444,6 @@ html, body, #root { min-height: 100%; }
   .confianza-tecla { width:clamp(22px,6.1vw,34px); height:30px; font-size:9px; }
   .confianza-leyenda { gap:8px 11px; }
 }
+
+.confianza-tecla.muestra-inicial { color:#c5d4e5; background:rgba(120,160,205,.12); border-color:rgba(120,160,205,.28); }
+.confianza-leyenda i.muestra-inicial { background:#789bba; }
