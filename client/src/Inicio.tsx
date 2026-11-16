@@ -13,8 +13,11 @@ export default function Inicio({ usuario, onLecciones, onLibre, onPerfil, onSali
         <a className="marca" href="#" onClick={(e) => e.preventDefault()}>
           FAST<span>TYPE</span><i>.</i>
         </a>
+        <nav className="topbar-nav" aria-label="Navegación principal">
+          <button onClick={onLecciones}>LECCIONES</button>
+          <button onClick={onLibre}>PRÁCTICA</button>
+        </nav>
         <div className="topbar-derecha">
-          <span className="estado-online"><i /> SISTEMA ACTIVO</span>
           <button className="usuario-chip usuario-chip-perfil" onClick={onPerfil} title="Abrir perfil" aria-label={`Abrir perfil de ${usuario}`}>{usuario}</button>
           <button className="boton-salir" onClick={onSalir}>Salir</button>
         </div>
@@ -29,10 +32,9 @@ export default function Inicio({ usuario, onLecciones, onLibre, onPerfil, onSali
             Cada pulsación te acerca a tu mejor versión.
           </p>
           <div className="hero-actions">
-            <button className="boton-principal" onClick={onLecciones}>
-              EMPEZAR A ENTRENAR <span>↗</span>
+            <button className="boton-principal" onClick={onLibre}>
+              COMENZAR A PRACTICAR <span>↗</span>
             </button>
-            <button className="boton-texto" onClick={onLibre}>Prueba de velocidad <span>→</span></button>
           </div>
         </div>
         <div className="hero-art" aria-hidden="true">
