@@ -378,7 +378,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
 
         <div className="lista-lecciones">
           {lecciones.map((l, i) => {
-            const bloqueada = i > completadas;
+            const bloqueada = false;
             const hecha = i < completadas;
             const nuevaEtapa = i === 0 || lecciones[i - 1].etapa !== l.etapa;
             return (
@@ -386,7 +386,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
                 {nuevaEtapa && <h3 className="etapa">{l.etapa}</h3>}
                 <button className={hecha ? "hecha" : ""} disabled={bloqueada} onClick={() => abrir(i)}>
                   <strong>{i + 1}. {l.titulo}</strong>
-                  <span>{hecha ? "✔ Completada" : bloqueada ? "🔒 Bloqueada" : "Disponible"}</span>
+                  <span>{hecha ? "✔ Completada" : "Disponible"}</span>
                 </button>
               </div>
             );
