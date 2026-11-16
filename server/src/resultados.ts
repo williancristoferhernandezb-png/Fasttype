@@ -7,6 +7,17 @@ export const resultadosRouter = Router();
 // La tabla resultados ya existe; se conserva para no perder el historial previo.
 export async function prepararTablaResultados() {
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS confianza_teclas_v2 (
+      usuario_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+      codigo TEXT NOT NULL,
+      etiqueta TEXT NOT NULL,
+      aciertos INTEGER NOT NULL DEFAULT 0 CHECK (aciertos >= 0),
+      intentos INTEGER NOT NULL DEFAULT 0 CHECK (intentos >= aciertos),
+      actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (usuario_id, codigo)
+    );
+  `);
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS confianza_teclas (
       usuario_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
       codigo TEXT NOT NULL,
@@ -40,15 +51,15 @@ resultadosRouter.post("/teclas", verificarToken, async (req: PeticionAutenticada
       }
     }
     await pool.query(
-      `INSERT INTO confianza_teclas (usuario_id, codigo, etiqueta, aciertos, intentos)
+      `INSERT INTO confianza_teclas_v2 (usuario_id, codigo, etiqueta, aciertos, intentos)
        SELECT $1, t.codigo, t.etiqueta, t.aciertos, t.intentos
        FROM jsonb_to_recordset($2::jsonb)
          AS t(codigo text, etiqueta text, aciertos integer, intentos integer)
        WHERE t.intentos > 0
        ON CONFLICT (usuario_id, codigo) DO UPDATE SET
          etiqueta = EXCLUDED.etiqueta,
-         aciertos = confianza_teclas.aciertos + EXCLUDED.aciertos,
-         intentos = confianza_teclas.intentos + EXCLUDED.intentos,
+         aciertos = confianza_teclas_v2.aciertos + EXCLUDED.aciertos,
+         intentos = confianza_teclas_v2.intentos + EXCLUDED.intentos,
          actualizado_en = NOW()`,
       [req.usuario!.id, JSON.stringify(teclas)]
     );
@@ -66,7 +77,7 @@ resultadosRouter.get("/teclas", verificarToken, async (req: PeticionAutenticada,
       `SELECT codigo, etiqueta, aciertos, intentos,
               CASE WHEN intentos = 0 THEN 0
                    ELSE ROUND(aciertos * 100.0 / intentos)::int END AS precision
-       FROM confianza_teclas
+       FROM confianza_teclas_v2
        WHERE usuario_id = $1
        ORDER BY codigo ASC`,
       [req.usuario!.id]
