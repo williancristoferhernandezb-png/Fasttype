@@ -24,6 +24,24 @@ const DURACION = 30;
 type TeclaReinicio = "Tab" | "Control" | "Shift";
 const DURACIONES = [15, 30, 60] as const;
 
+function codigoTeclaEsperada(caracter: string): string | null {
+  if (caracter === " ") return "Space";
+  if (/^[a-z]$/i.test(caracter)) return "Key" + caracter.toUpperCase();
+  if (/^\\d$/.test(caracter)) return "Digit" + caracter;
+  const mapa: Record<string, string> = {
+    "ñ": "Semicolon", "Ñ": "Semicolon", ",": "Comma", ".": "Period",
+    "/": "Slash", "?": "Slash", ";": "Semicolon", ":": "Semicolon",
+    "'": "Quote", '"': "Quote", "[": "BracketLeft", "{": "BracketLeft",
+    "]": "BracketRight", "}": "BracketRight", "\\": "Backslash", "|": "Backslash",
+    "-": "Minus", "_": "Minus", "=": "Equal", "+": "Equal",
+    "`": "Backquote", "~": "Backquote", "!": "Digit1", "@": "Digit2",
+    "#": "Digit3", "$": "Digit4", "%": "Digit5", "^": "Digit6",
+    "&": "Digit7", "*": "Digit8", "(": "Digit9", ")": "Digit0",
+  };
+  return mapa[caracter] ?? null;
+}
+
+
 function textoAleatorio() {
   return TEXTOS[Math.floor(Math.random() * TEXTOS.length)];
 }
@@ -148,14 +166,17 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   }
 
   function manejarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!terminado && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
-      const codigo = e.code;
-      const etiqueta = e.key === " " ? "ESP" : e.key.toLocaleUpperCase().slice(0, 4);
-      const registro = confianzaTeclasRef.current[codigo] ?? { etiqueta, aciertos: 0, intentos: 0 };
-      registro.etiqueta = etiqueta;
-      registro.intentos += 1;
-      if (e.key === texto[escrito.length]) registro.aciertos += 1;
-      confianzaTeclasRef.current[codigo] = registro;
+    if (!terminado && !e.repeat && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
+      const esperado = texto[escrito.length];
+      const codigo = codigoTeclaEsperada(esperado);
+      if (codigo) {
+        const etiqueta = esperado === " " ? "ESP" : esperado.toLocaleUpperCase().slice(0, 4);
+        const registro = confianzaTeclasRef.current[codigo] ?? { etiqueta, aciertos: 0, intentos: 0 };
+        registro.etiqueta = etiqueta;
+        registro.intentos += 1;
+        if (e.key === esperado && e.code === codigo) registro.aciertos += 1;
+        confianzaTeclasRef.current[codigo] = registro;
+      }
     }
     const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
       : teclaReinicio === "Shift" ? e.key === "Shift"
