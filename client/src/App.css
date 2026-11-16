@@ -336,6 +336,13 @@ button:disabled {
 /* ===== FASTTYPE / TOXIC NEON INTERFACE ===== */
 .app-shell { min-height: 100vh; color: #f4f5f7; }
 .inicio { width: min(1180px, 100%); margin: 0 auto; padding: 24px 34px 22px; }
+.topbar-nav { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.topbar-nav button { padding:8px 10px; background:transparent; color:#c7d0c7; border:0; font-size:11px; letter-spacing:.1em; }
+.topbar-nav button:hover { color:var(--verde); background:transparent; }
+@media (max-width:640px) {
+  .topbar-nav { order:3; width:100%; justify-content:center; }
+  .topbar { flex-wrap:wrap; }
+}
 .topbar, .topbar-derecha, .vista-cabecera { display:flex; align-items:center; justify-content:space-between; gap:18px; }
 .topbar { min-height:48px; border-bottom:1px solid rgba(255,255,255,.08); padding-bottom:18px; }
 .marca { color:#f4f5f7; text-decoration:none; font-family:'Barlow Condensed',sans-serif; font-size:25px; font-weight:900; letter-spacing:.08em; }
