@@ -81,32 +81,27 @@ function generarTexto(longitud: number, categorias: CategoriaPractica[]) {
   return resultado;
 }
 
-function ConfiguracionPractica({ onIniciar, onInicio }: { onIniciar: (categorias: CategoriaPractica[]) => void; onInicio: () => void }) {
-  const [seleccionadas, setSeleccionadas] = useState<CategoriaPractica[]>(["letras"]);
+function SelectorCategorias({ categorias, onChange }: { categorias: CategoriaPractica[]; onChange: (categorias: CategoriaPractica[]) => void }) {
   function alternar(id: CategoriaPractica) {
-    setSeleccionadas((actuales) => actuales.includes(id) ? actuales.filter((x) => x !== id) : [...actuales, id]);
+    onChange(categorias.includes(id) ? categorias.filter((x) => x !== id) : [...categorias, id]);
   }
+  const resumen = categorias.length === 0 ? "Elegir contenido" : categorias.map((id) => CATEGORIAS.find((x) => x.id === id)?.nombre).filter(Boolean).join(" + ");
   return (
-    <section className="vista-contenido pantalla-entrenamiento configuracion-practica">
-      <div className="vista-cabecera">
-        <button className="boton-texto" onClick={onInicio}>← INICIO</button>
-        <h2>PRÁCTICA</h2>
-      </div>
-      <p className="lecciones-descripcion">Elige qué quieres practicar. Puedes combinar varias opciones.</p>
-      <div className="opciones-practica">
+    <details className="selector-categorias-nav">
+      <summary aria-label="Cambiar contenido de práctica"><span>CONTENIDO</span><b>{resumen}</b><i>⌄</i></summary>
+      <div className="selector-categorias-menu">
         {CATEGORIAS.map((categoria) => (
-          <label key={categoria.id} className={seleccionadas.includes(categoria.id) ? "opcion-practica seleccionada" : "opcion-practica"}>
-            <input type="checkbox" checked={seleccionadas.includes(categoria.id)} onChange={() => alternar(categoria.id)} />
+          <label key={categoria.id}>
+            <input type="checkbox" checked={categorias.includes(categoria.id)} onChange={() => alternar(categoria.id)} />
             <span>{categoria.nombre}</span>
           </label>
         ))}
       </div>
-      <button className="boton-principal" disabled={seleccionadas.length === 0} onClick={() => onIniciar(seleccionadas)}>COMENZAR <span>↗</span></button>
-    </section>
+    </details>
   );
 }
 
-function Test({ usuario, categorias, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; categorias: CategoriaPractica[]; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
+function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; categorias: CategoriaPractica[]; onCategoriasChange: (categorias: CategoriaPractica[]) => void; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [duracion, setDuracion] = useState<number>(() => {
     const guardada = localStorage.getItem("fasttype_duracion_libre");
     if (guardada === null) return DURACION;
@@ -162,6 +157,17 @@ function Test({ usuario, categorias, onSalir, onInicio, fuente, tamano, onFuente
     confianzaTeclasRef.current = {};
     setTimeout(() => inputRef.current?.focus(), 0);
   }
+
+  useEffect(() => {
+    setTexto(generarTexto(duracion === 0 ? 1200 : Math.max(500, duracion * 12), categorias));
+    setEscrito("");
+    setTiempo(duracion);
+    setTranscurrido(0);
+    setIniciado(false);
+    guardadoRef.current = false;
+    guardadoTeclasRef.current = false;
+    confianzaTeclasRef.current = {};
+  }, [categorias.join("|")]);
 
   function elegirDuracion(valor: number) {
     setDuracion(valor);
@@ -258,6 +264,7 @@ function Test({ usuario, categorias, onSalir, onInicio, fuente, tamano, onFuente
       <div className="vista-cabecera cabecera-prueba-libre">
         <button className="boton-texto" onClick={() => { guardarConfianzaActual(); onInicio(); }}>← INICIO</button>
         <span className="usuario-chip">{usuario}</span>
+        <SelectorCategorias categorias={categorias} onChange={onCategoriasChange} />
         <div className="prueba-libre-controles" aria-label="Configuración de la prueba">
         <div className="selector-duracion" role="group" aria-label="Duración">
           {DURACIONES.map((valor) => <button key={valor} className={duracion === valor ? "activa" : ""} onClick={() => elegirDuracion(valor)} aria-pressed={duracion === valor}>{valor}s</button>)}
@@ -307,7 +314,7 @@ function Test({ usuario, categorias, onSalir, onInicio, fuente, tamano, onFuente
 function App() {
   const [usuario, setUsuario] = useState<string | null>(null);
   const [comprobandoSesion, setComprobandoSesion] = useState(true);
-  const [vista, setVista] = useState<"inicio" | "lecciones" | "config-practica" | "libre" | "perfil">("inicio");
+  const [vista, setVista] = useState<"inicio" | "lecciones" | "libre" | "perfil">("inicio");
   const [categoriasPractica, setCategoriasPractica] = useState<CategoriaPractica[]>(["letras"]);
   const [fuente, setFuente] = useState<FuenteEscritura>(() => {
     const v = localStorage.getItem("fasttype_fuente");
@@ -358,7 +365,7 @@ function App() {
   return (
     <div className="app-shell">
       {vista === "inicio" ? (
-        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("config-practica")} onPerfil={() => setVista("perfil")} onSalir={salir} />
+        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onPerfil={() => setVista("perfil")} onSalir={salir} />
       ) : vista === "lecciones" ? (
         <section className="vista-contenido pantalla-entrenamiento vista-lecciones">
           <div className="vista-cabecera">
@@ -368,12 +375,10 @@ function App() {
           </div>
           <Lecciones usuario={usuario} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
         </section>
-      ) : vista === "config-practica" ? (
-        <ConfiguracionPractica onInicio={() => setVista("inicio")} onIniciar={(categorias) => { setCategoriasPractica(categorias); setVista("libre"); }} />
       ) : vista === "perfil" ? (
         <Perfil usuario={usuario} onInicio={() => setVista("inicio")} onSalir={salir} />
       ) : (
-        <Test usuario={usuario} categorias={categoriasPractica} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
+        <Test usuario={usuario} categorias={categoriasPractica} onCategoriasChange={setCategoriasPractica} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
       )}
     </div>
   );
