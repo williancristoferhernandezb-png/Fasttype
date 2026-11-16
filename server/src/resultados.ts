@@ -39,20 +39,20 @@ resultadosRouter.post("/teclas", verificarToken, async (req: PeticionAutenticada
         return;
       }
     }
-    for (const t of teclas) {
-      if (t.intentos === 0) continue;
-      await pool.query(
-        `INSERT INTO confianza_teclas (usuario_id, codigo, etiqueta, aciertos, intentos)
-         VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT (usuario_id, codigo) DO UPDATE SET
-           etiqueta = EXCLUDED.etiqueta,
-           aciertos = confianza_teclas.aciertos + EXCLUDED.aciertos,
-           intentos = confianza_teclas.intentos + EXCLUDED.intentos,
-           actualizado_en = NOW()`,
-        [req.usuario!.id, t.codigo, t.etiqueta, t.aciertos, t.intentos]
-      );
-    }
-    res.json({ guardadas: teclas.length });
+    await pool.query(
+      `INSERT INTO confianza_teclas (usuario_id, codigo, etiqueta, aciertos, intentos)
+       SELECT $1, t.codigo, t.etiqueta, t.aciertos, t.intentos
+       FROM jsonb_to_recordset($2::jsonb)
+         AS t(codigo text, etiqueta text, aciertos integer, intentos integer)
+       WHERE t.intentos > 0
+       ON CONFLICT (usuario_id, codigo) DO UPDATE SET
+         etiqueta = EXCLUDED.etiqueta,
+         aciertos = confianza_teclas.aciertos + EXCLUDED.aciertos,
+         intentos = confianza_teclas.intentos + EXCLUDED.intentos,
+         actualizado_en = NOW()`,
+      [req.usuario!.id, JSON.stringify(teclas)]
+    );
+    res.json({ guardadas: teclas.filter((t: { intentos: number }) => t.intentos > 0).length });
   } catch (error) {
     console.error("Error guardando confianza de teclas:", error);
     res.status(500).json({ error: "No se pudo guardar la confianza de teclas" });
