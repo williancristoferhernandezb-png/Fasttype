@@ -148,7 +148,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   }
 
   function manejarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!terminado && iniciado && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
+    if (!terminado && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
       const codigo = e.code;
       const etiqueta = e.key === " " ? "ESP" : e.key.toLocaleUpperCase().slice(0, 4);
       const registro = confianzaTeclasRef.current[codigo] ?? { etiqueta, aciertos: 0, intentos: 0 };
