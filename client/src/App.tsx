@@ -168,13 +168,14 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   function manejarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
     if (!terminado && !e.repeat && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
       const esperado = texto[escrito.length];
-      const codigo = codigoTeclaEsperada(esperado);
+      const codigoBase = codigoTeclaEsperada(esperado);
+      const codigo = e.key === esperado && e.code.startsWith("Numpad") ? e.code : codigoBase;
       if (codigo) {
         const etiqueta = esperado === " " ? "ESP" : esperado.toLocaleUpperCase().slice(0, 4);
         const registro = confianzaTeclasRef.current[codigo] ?? { etiqueta, aciertos: 0, intentos: 0 };
         registro.etiqueta = etiqueta;
         registro.intentos += 1;
-        if (e.key === esperado && e.code === codigo) registro.aciertos += 1;
+        if (e.key === esperado && (e.code === codigoBase || e.code === codigo)) registro.aciertos += 1;
         confianzaTeclasRef.current[codigo] = registro;
       }
     }
