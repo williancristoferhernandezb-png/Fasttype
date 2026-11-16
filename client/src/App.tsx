@@ -97,6 +97,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   const precision = escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
   function reiniciar(nuevaDuracion = duracion) {
+    guardarConfianzaActual();
     setTexto(generarTexto(nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12)));
     setEscrito("");
     setTiempo(nuevaDuracion);
@@ -147,11 +148,17 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
       .catch(() => {});
   }, [terminado, escrito.length, wpm, precision, segundosUsados]);
 
-  useEffect(() => {
-    if (!terminado || guardadoTeclasRef.current || escrito.length === 0) return;
-    guardadoTeclasRef.current = true;
+  function guardarConfianzaActual() {
+    if (guardadoTeclasRef.current) return;
     const teclas = Object.entries(confianzaTeclasRef.current).map(([codigo, t]) => ({ codigo, ...t }));
-    if (teclas.length) guardarConfianzaTeclas(teclas).catch(() => {});
+    if (!teclas.length) return;
+    guardadoTeclasRef.current = true;
+    guardarConfianzaTeclas(teclas).catch((error) => console.error("No se pudo guardar la precisión por tecla:", error));
+  }
+
+  useEffect(() => {
+    if (!terminado || escrito.length === 0) return;
+    guardarConfianzaActual();
   }, [terminado, escrito.length]);
 
   function manejarCambio(e: React.ChangeEvent<HTMLInputElement>) {
@@ -195,7 +202,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
   return (
     <section className="vista-contenido pantalla-entrenamiento prueba-libre" style={estiloEscritura(fuente, tamano)}>
       <div className="vista-cabecera cabecera-prueba-libre">
-        <button className="boton-texto" onClick={onInicio}>← INICIO</button>
+        <button className="boton-texto" onClick={() => { guardarConfianzaActual(); onInicio(); }}>← INICIO</button>
         <span className="usuario-chip">{usuario}</span>
         <div className="prueba-libre-controles" aria-label="Configuración de la prueba">
         <div className="selector-duracion" role="group" aria-label="Duración">
@@ -219,7 +226,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
         <button className="reiniciar-libre" onClick={() => reiniciar()} title="Reiniciar prueba" aria-label="Reiniciar prueba">↻</button>
       </div>
         <ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} />
-        <button className="boton-salir" onClick={onSalir}>Salir</button>
+        <button className="boton-salir" onClick={() => { guardarConfianzaActual(); onSalir(); }}>Salir</button>
       </div>
       <h1>PRUEBA <span>LIBRE.</span></h1>
       <p className="tiempo">{duracion === 0 ? tiempoVisible : tiempo + "s"}</p>
