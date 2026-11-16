@@ -198,6 +198,9 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
   }
 
   function abrir(indice: number) {
+    guardarConfianzaActual();
+    confianzaTeclasRef.current = {};
+    confianzaGuardadaRef.current = false;
     setActual(indice); setEscrito(""); inicioRef.current = null;
     intentoGuardadoRef.current = ""; setTiempoMs(0);
     setTimeout(() => inputRef.current?.focus(), 0);
