@@ -6,8 +6,77 @@ export const resultadosRouter = Router();
 
 // La tabla resultados ya existe; se conserva para no perder el historial previo.
 export async function prepararTablaResultados() {
-  return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS confianza_teclas (
+      usuario_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+      codigo TEXT NOT NULL,
+      etiqueta TEXT NOT NULL,
+      aciertos INTEGER NOT NULL DEFAULT 0 CHECK (aciertos >= 0),
+      intentos INTEGER NOT NULL DEFAULT 0 CHECK (intentos >= aciertos),
+      actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      PRIMARY KEY (usuario_id, codigo)
+    );
+  `);
 }
+
+
+ // Guardar el resumen acumulado de precisión por tecla.
+resultadosRouter.post("/teclas", verificarToken, async (req: PeticionAutenticada, res) => {
+  try {
+    const teclas = req.body?.teclas;
+    if (!Array.isArray(teclas) || teclas.length > 100) {
+      res.status(400).json({ error: "Datos de teclas inválidos" });
+      return;
+    }
+    for (const t of teclas) {
+      if (
+        typeof t.codigo !== "string" || !/^[A-Za-z0-9]+$/.test(t.codigo) ||
+        typeof t.etiqueta !== "string" || t.etiqueta.length > 4 ||
+        !Number.isInteger(t.aciertos) || !Number.isInteger(t.intentos) ||
+        t.aciertos < 0 || t.intentos < t.aciertos || t.intentos > 100000
+      ) {
+        res.status(400).json({ error: "Registro de tecla inválido" });
+        return;
+      }
+    }
+    for (const t of teclas) {
+      if (t.intentos === 0) continue;
+      await pool.query(
+        `INSERT INTO confianza_teclas (usuario_id, codigo, etiqueta, aciertos, intentos)
+         VALUES ($1, $2, $3, $4, $5)
+         ON CONFLICT (usuario_id, codigo) DO UPDATE SET
+           etiqueta = EXCLUDED.etiqueta,
+           aciertos = confianza_teclas.aciertos + EXCLUDED.aciertos,
+           intentos = confianza_teclas.intentos + EXCLUDED.intentos,
+           actualizado_en = NOW()`,
+        [req.usuario!.id, t.codigo, t.etiqueta, t.aciertos, t.intentos]
+      );
+    }
+    res.json({ guardadas: teclas.length });
+  } catch (error) {
+    console.error("Error guardando confianza de teclas:", error);
+    res.status(500).json({ error: "No se pudo guardar la confianza de teclas" });
+  }
+});
+
+// Estadísticas acumuladas por tecla del usuario autenticado.
+resultadosRouter.get("/teclas", verificarToken, async (req: PeticionAutenticada, res) => {
+  try {
+    const resultado = await pool.query(
+      `SELECT codigo, etiqueta, aciertos, intentos,
+              CASE WHEN intentos = 0 THEN 0
+                   ELSE ROUND(aciertos * 100.0 / intentos)::int END AS precision
+       FROM confianza_teclas
+       WHERE usuario_id = $1
+       ORDER BY codigo ASC`,
+      [req.usuario!.id]
+    );
+    res.json(resultado.rows);
+  } catch (error) {
+    console.error("Error obteniendo confianza de teclas:", error);
+    res.status(500).json({ error: "No se pudo obtener la confianza de teclas" });
+  }
+});
 
 // Guardar una prueba terminada del usuario autenticado.
 resultadosRouter.post("/", verificarToken, async (req: PeticionAutenticada, res) => {
