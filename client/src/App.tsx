@@ -106,7 +106,7 @@ function ConfiguracionPractica({ onIniciar, onInicio }: { onIniciar: (categorias
   );
 }
 
-function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
+function Test({ usuario, categorias, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; categorias: CategoriaPractica[]; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [duracion, setDuracion] = useState<number>(() => {
     const guardada = localStorage.getItem("fasttype_duracion_libre");
     if (guardada === null) return DURACION;
@@ -122,7 +122,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
     const v = localStorage.getItem("fasttype_tecla_reinicio");
     return v === "Tab" || v === "Control" || v === "Shift" ? v : "Tab";
   });
-  const [texto, setTexto] = useState(() => generarTexto(12 * DURACION));
+  const [texto, setTexto] = useState(() => generarTexto(12 * DURACION, categorias));
   const [escrito, setEscrito] = useState("");
   const [tiempo, setTiempo] = useState(duracion);
   const [transcurrido, setTranscurrido] = useState(0);
@@ -152,7 +152,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
 
   function reiniciar(nuevaDuracion = duracion) {
     guardarConfianzaActual();
-    setTexto(generarTexto(nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12)));
+    setTexto(generarTexto(nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12), categorias));
     setEscrito("");
     setTiempo(nuevaDuracion);
     setTranscurrido(0);
@@ -221,7 +221,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
     const nuevoTexto = e.target.value;
     setEscrito(nuevoTexto);
     if (duracion === 0 && texto.length - nuevoTexto.length < 120) {
-      const textoExtra = " " + textoAleatorio();
+      const textoExtra = " " + textoAleatorio(categorias);
       setTexto((anterior) => anterior + textoExtra);
     }
   }
@@ -282,7 +282,7 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
         <ControlesTexto fuente={fuente} tamano={tamano} onFuente={onFuente} onTamano={onTamano} />
         <button className="boton-salir" onClick={() => { guardarConfianzaActual(); onSalir(); }}>Salir</button>
       </div>
-      <h1>PRUEBA <span>LIBRE.</span></h1>
+      <h1>PRÁCTICA</h1>
       <p className="tiempo">{duracion === 0 ? tiempoVisible : tiempo + "s"}</p>
       <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">
         <p className="texto texto-flotante" aria-label={texto}>
@@ -307,7 +307,8 @@ function Test({ usuario, onSalir, onInicio, fuente, tamano, onFuente, onTamano }
 function App() {
   const [usuario, setUsuario] = useState<string | null>(null);
   const [comprobandoSesion, setComprobandoSesion] = useState(true);
-  const [vista, setVista] = useState<"inicio" | "lecciones" | "libre" | "perfil">("inicio");
+  const [vista, setVista] = useState<"inicio" | "lecciones" | "config-practica" | "libre" | "perfil">("inicio");
+  const [categoriasPractica, setCategoriasPractica] = useState<CategoriaPractica[]>(["letras"]);
   const [fuente, setFuente] = useState<FuenteEscritura>(() => {
     const v = localStorage.getItem("fasttype_fuente");
     return v === "Lexend" || v === "Atkinson Hyperlegible" || v === "Arial" ? v : "Inter";
@@ -357,7 +358,7 @@ function App() {
   return (
     <div className="app-shell">
       {vista === "inicio" ? (
-        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onPerfil={() => setVista("perfil")} onSalir={salir} />
+        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("config-practica")} onPerfil={() => setVista("perfil")} onSalir={salir} />
       ) : vista === "lecciones" ? (
         <section className="vista-contenido pantalla-entrenamiento vista-lecciones">
           <div className="vista-cabecera">
@@ -367,10 +368,12 @@ function App() {
           </div>
           <Lecciones usuario={usuario} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
         </section>
+      ) : vista === "config-practica" ? (
+        <ConfiguracionPractica onInicio={() => setVista("inicio")} onIniciar={(categorias) => { setCategoriasPractica(categorias); setVista("libre"); }} />
       ) : vista === "perfil" ? (
         <Perfil usuario={usuario} onInicio={() => setVista("inicio")} onSalir={salir} />
       ) : (
-        <Test usuario={usuario} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
+        <Test usuario={usuario} categorias={categoriasPractica} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
       )}
     </div>
   );
