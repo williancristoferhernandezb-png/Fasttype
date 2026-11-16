@@ -1413,3 +1413,34 @@ html, body, #root { min-height: 100%; }
   .perfil-grafica { height:120px; }
   .perfil-calendario-grid { gap:4px; }
 }
+
+
+/* Keyboard confidence: precisión acumulada por tecla. */
+.perfil-panel-confianza { margin-top:18px; }
+.confianza-teclado { display:grid; gap:7px; padding:6px 0 2px; }
+.confianza-fila { display:flex; justify-content:center; gap:6px; }
+.confianza-fila-1 { padding-left:18px; }
+.confianza-fila-2 { padding-left:36px; }
+.confianza-fila-3 { padding-left:54px; }
+.confianza-tecla { display:grid; place-items:center; min-width:0; width:clamp(27px,5.1vw,48px); height:clamp(29px,4.4vw,42px); border:1px solid rgba(255,255,255,.09); border-radius:5px; color:#cbd4cb; background:#252d27; font-size:11px; font-weight:650; transition:background .15s,border-color .15s; }
+.confianza-tecla.sin-datos { color:#748075; background:#171e19; border-color:#29332b; }
+.confianza-tecla.dominio-alto { color:#d9ff9b; background:rgba(182,255,0,.22); border-color:rgba(182,255,0,.48); }
+.confianza-tecla.dominio-medio { color:#ffe29a; background:rgba(255,190,55,.18); border-color:rgba(255,190,55,.42); }
+.confianza-tecla.dominio-bajo { color:#ff9dad; background:rgba(255,80,110,.17); border-color:rgba(255,80,110,.42); }
+.confianza-fila-espacio .confianza-tecla { width:min(48%,360px); height:32px; font-size:9px; letter-spacing:.12em; }
+.confianza-leyenda { display:flex; flex-wrap:wrap; justify-content:center; gap:9px 17px; margin-top:12px; }
+.confianza-leyenda span { display:flex; align-items:center; gap:6px; color:#7f8b80; font-size:9px; }
+.confianza-leyenda i { width:8px; height:8px; border-radius:2px; display:inline-block; }
+.confianza-leyenda i.dominio-alto { background:#b6ff00; }
+.confianza-leyenda i.dominio-medio { background:#ffbe37; }
+.confianza-leyenda i.dominio-bajo { background:#ff506e; }
+.confianza-leyenda i.sin-datos { background:#374238; }
+.perfil-confianza-nota { margin:12px 0 0; color:#68756b; font-size:9px; text-align:center; }
+@media (max-width:600px) {
+  .confianza-fila { gap:3px; }
+  .confianza-fila-1 { padding-left:8px; }
+  .confianza-fila-2 { padding-left:16px; }
+  .confianza-fila-3 { padding-left:24px; }
+  .confianza-tecla { width:clamp(22px,6.1vw,34px); height:30px; font-size:9px; }
+  .confianza-leyenda { gap:8px 11px; }
+}
