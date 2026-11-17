@@ -738,22 +738,24 @@ html, body, #root { min-height: 100%; }
 .pantalla-entrenamiento .zona-escritura {
   flex: 1 1 auto;
   min-height: 0;
-  display: flex;
-  align-items: center;
+  display: block;
   margin: 8px 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .pantalla-entrenamiento .texto.texto-flotante {
   width: 100%;
-  max-height: 100%;
+  max-height: none;
   padding: 0;
   margin: 0;
   font-size: clamp(22px, 2.65vw, 34px);
   line-height: 1.9;
   letter-spacing: .045em;
-  overflow: hidden;
-  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  overflow: visible;
 }
 .pantalla-entrenamiento .leccion-metricas {
   flex: 0 0 auto;
@@ -1502,7 +1504,7 @@ html, body, #root { min-height: 100%; }
 
 /* Mantener cada palabra completa al ajustar el texto al ancho disponible. */
 .pantalla-entrenamiento .texto.texto-flotante {
-  word-break: keep-all;
+  word-break: normal;
   overflow-wrap: normal;
   hyphens: none;
 }
