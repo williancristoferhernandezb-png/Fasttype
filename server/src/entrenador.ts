@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verificarToken, type PeticionAutenticada } from "./verificarToken";
+import { pool } from "./db";
 
 export const entrenadorRouter = Router();
 
@@ -14,7 +15,6 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
     }
 
     const categorias = req.body?.categorias;
-    const teclas = req.body?.teclas;
     const longitud = Number(req.body?.longitud ?? 700);
 
     if (
@@ -24,25 +24,25 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
       categorias.some((c: unknown) => typeof c !== "string" || !CATEGORIAS_VALIDAS.has(c)) ||
       !Number.isInteger(longitud) ||
       longitud < 250 ||
-      longitud > 1800 ||
-      !Array.isArray(teclas) ||
-      teclas.length > 8
+      longitud > 1800
     ) {
       res.status(400).json({ error: "La configuración del ejercicio no es válida." });
       return;
     }
 
-    const teclasDebiles = teclas
-      .filter((t: any) =>
-        typeof t?.etiqueta === "string" &&
-        Number.isInteger(t?.precision) &&
-        Number.isInteger(t?.intentos) &&
-        t.intentos >= 10 &&
-        t.precision >= 0 &&
-        t.precision < 90
-      )
-      .slice(0, 8)
-      .map((t: any) => ({ etiqueta: t.etiqueta.slice(0, 4), precision: t.precision, intentos: t.intentos }));
+    // Las debilidades se obtienen directamente de las estadísticas guardadas del usuario autenticado.
+    const resultadoTeclas = await pool.query(
+      `SELECT etiqueta, aciertos, intentos,
+              ROUND(aciertos * 100.0 / NULLIF(intentos, 0))::int AS precision
+       FROM confianza_teclas_v2
+       WHERE usuario_id = $1 AND intentos >= 10
+       ORDER BY (aciertos * 100.0 / NULLIF(intentos, 0)) ASC, intentos DESC
+       LIMIT 8`,
+      [req.usuario!.id]
+    );
+    const teclasDebiles = resultadoTeclas.rows
+      .filter((t: any) => Number(t.precision) < 90)
+      .map((t: any) => ({ etiqueta: String(t.etiqueta).slice(0, 4), precision: Number(t.precision), intentos: Number(t.intentos) }));
 
     const nombres: Record<string, string> = {
       letras: "letras y palabras",
