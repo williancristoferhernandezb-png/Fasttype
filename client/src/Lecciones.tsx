@@ -217,8 +217,8 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
 
   function manejarTeclaEspecial(e: React.KeyboardEvent<HTMLInputElement>) {
     const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
-      : teclaReinicio === "Shift" ? !leccion?.distribucionUS && e.key === "Shift"
-      : e.key === "Control" && !e.altKey && !e.metaKey;
+      : teclaReinicio === "Shift" ? !leccion?.distribucionUS && !leccion?.secuencia && e.key === "Shift"
+      : !leccion?.secuencia && e.key === "Control" && !e.altKey && !e.metaKey;
     if (coincide) {
       e.preventDefault();
       abrir(actual!);
