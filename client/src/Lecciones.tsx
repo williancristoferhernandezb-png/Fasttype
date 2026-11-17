@@ -487,6 +487,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           })}
           {escrito.length === leccion.texto.length && <span className="cursor-escritura cursor-final" aria-hidden="true" />}
         </p>
+        )}
         <input
           ref={inputRef}
           className="input-escritura-invisible"
