@@ -83,7 +83,7 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
       },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-6-astra",
-        instructions,
+        instructions: instrucciones,
         input: "Genera el siguiente ejercicio de mecanografía.",
         max_output_tokens: 650
       }),
