@@ -161,6 +161,7 @@ export type ActividadDiaria = {
   fecha: string;
   practicas: number;
   promedio_wpm: number;
+  promedio_precision: number;
   mejor_wpm: number;
 };
 
