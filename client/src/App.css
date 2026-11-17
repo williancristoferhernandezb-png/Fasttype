@@ -408,6 +408,7 @@ button:disabled {
 .vista-contenido h1 span { color:var(--verde); }
 .vista-contenido h2,.vista-contenido h3 { color:#f4f5f7; }
 .vista-contenido .tiempo { color:var(--verde); font-family:'Barlow Condensed',sans-serif; font-size:54px; }
+.vista-contenido .velocidad-actual { font-variant-numeric:tabular-nums; transition:color .2s ease; }
 .vista-contenido .texto { color:#aeb7af; background:#111712; border:1px solid #283329; border-radius:12px; }
 .vista-contenido .pendiente { color:#647066; }
 .vista-contenido .correcta { color:var(--verde); }
@@ -1497,3 +1498,11 @@ html, body, #root { min-height: 100%; }
 .perfil-grafica-leyenda i { display:inline-block; width:8px; height:8px; border-radius:50%; }
 .perfil-grafica-leyenda .leyenda-velocidad { background:#b6ff00; }
 .perfil-grafica-leyenda .leyenda-precision { background:#55b8ff; }
+
+
+/* Mantener cada palabra completa al ajustar el texto al ancho disponible. */
+.pantalla-entrenamiento .texto.texto-flotante {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  hyphens: none;
+}
