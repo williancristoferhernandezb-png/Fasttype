@@ -28,19 +28,21 @@ function codigoTeclaEsperada(caracter: string, curso?: string): string | null {
 }
 
 
-type Seccion = "alfa" | "numerica";
+type Seccion = "alfa" | "numerica" | "especial";
 type Variante = "numpad" | "fila";
 
 const CLAVE_PROGRESO: Record<Modo, string> = {
   alfa: "progreso2",
   numpad: "progreso_numpad",
   fila: "progreso_fila",
+  especial: "progreso_especial",
 };
 
 const DESCRIPCION: Record<Modo, string> = {
   alfa: "Letras del teclado: fila base, superior e inferior, palabras y frases.",
   numpad: "Teclado numérico lateral con la técnica de 5 dedos. Tecla guía: el 5.",
   fila: "Números del 1 al 0 de la fila superior, con los dedos de ambas manos desde la fila base.",
+  especial: "Shift, Backspace, Ctrl y Alt: aprende a utilizar modificadores y combinaciones reales.",
 };
 
 function leerProgreso(modo: Modo, usuario: string) {
@@ -73,6 +75,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     alfa: leerProgreso("alfa", usuario),
     numpad: leerProgreso("numpad", usuario),
     fila: leerProgreso("fila", usuario),
+    especial: leerProgreso("especial", usuario),
   }));
   const [seccion, setSeccion] = useState<Seccion>(() =>
     leerPreferencia<Seccion>("seccion_lecciones", ["alfa", "numerica"], "alfa")
@@ -100,11 +103,11 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     return v === "Tab" || v === "Control" || v === "Shift" ? v : "Tab";
   });
 
-  const curso: Modo = seccion === "alfa" ? "alfa" : variante;
+  const curso: Modo = seccion === "especial" ? "especial" : seccion === "alfa" ? "alfa" : variante;
   const lecciones = CURSOS[curso];
   const completadas = progreso[curso];
   const leccion = actual !== null ? lecciones[actual] : null;
-  const terminado = leccion !== null && escrito.length === leccion.texto.length;
+  const terminado = leccion !== null && escrito.length === (leccion.secuencia?.length ?? leccion.texto.length);
 
   let correctos = 0;
   if (leccion) {
@@ -219,6 +222,28 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
     if (coincide) {
       e.preventDefault();
       abrir(actual!);
+      return;
+    }
+
+    if (leccion?.secuencia) {
+      const codigo = e.nativeEvent.code;
+      let accion = "";
+      if (codigo === "ShiftLeft" || codigo === "ShiftRight") accion = codigo === "ShiftLeft" ? "SHIFT_LEFT" : "SHIFT_RIGHT";
+      else if (codigo === "Backspace") accion = "BACKSPACE";
+      else if (e.ctrlKey && /^[a-z]$/i.test(e.key)) accion = "CTRL+" + e.key.toUpperCase();
+      else if (e.altKey && /^[a-z]$/i.test(e.key)) accion = "ALT+" + e.key.toUpperCase();
+      else if (e.shiftKey && /^Digit[0-9]$/.test(codigo)) accion = "SHIFT+" + codigo;
+      else if (e.shiftKey && /^Key[A-Z]$/.test(codigo)) accion = "SHIFT+" + e.key.toUpperCase();
+      if (accion || e.key === "Control" || e.key === "Alt" || e.key === "Shift" || e.key.length === 1) {
+        e.preventDefault(); e.stopPropagation();
+        if (terminado) return;
+        const esperado = leccion.secuencia[escrito.length];
+        const acierto = accion === esperado;
+        if (inicioRef.current === null) inicioRef.current = Date.now();
+        setEscrito((actual) => actual + (acierto ? "✓" : "×"));
+        return;
+      }
+      if (e.key === "Tab" || e.key === "Enter") e.preventDefault();
       return;
     }
 
@@ -361,7 +386,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           </button>
         </div>
 
-        {seccion === "numerica" && (
+        <div className="pestanas"><button className={seccion === "especial" ? "activa" : ""} onClick={() => elegirSeccion("especial")}>Teclas especiales</button></div>\n\n        {seccion === "numerica" && (
           <div className="pestanas variantes">
             <button className={variante === "numpad" ? "activa" : ""} onClick={() => elegirVariante("numpad")}>
               Teclado numérico (Numpad)
@@ -426,6 +451,11 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
         role="group"
         aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado."
       >
+        {leccion.secuencia ? (
+          <div className="secuencia-especial" aria-label={leccion.instruccion}>
+            {leccion.secuencia.map((paso, i) => <span key={i} className={i < escrito.length ? (escrito[i] === "✓" ? "paso-correcto" : "paso-error") : i === escrito.length ? "paso-actual" : ""}>{paso.replace("SHIFT_LEFT","Shift izquierdo").replace("SHIFT_RIGHT","Shift derecho").replace("SHIFT+Digit","Shift+").replace("CTRL+","Ctrl+").replace("ALT+","Alt+")}</span>)}
+          </div>
+        ) : (
         <p className="texto texto-flotante" aria-label={leccion.texto}>
           {leccion.texto.split("").map((letra, i) => {
             let clase = "pendiente";
@@ -452,13 +482,13 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
           onChange={(e) => {
             // En Numpad la entrada se procesa exclusivamente desde onKeyDown.
             // Bloquea cualquier inserción automática del navegador (incluido espacio).
-            if (curso !== "numpad" && !leccion?.distribucionUS) manejarEscritura(e.target.value);
+            if (curso !== "numpad" && !leccion?.distribucionUS && !leccion?.secuencia) manejarEscritura(e.target.value);
           }}
           onKeyDown={manejarTeclaEspecial}
           onBeforeInput={(e) => {
             // En Numpad toda la entrada viene del código físico capturado arriba.
             // Evita que beforeinput inserte por segunda vez el carácter del navegador.
-            if (curso === "numpad" || leccion?.distribucionUS) e.preventDefault();
+            if (curso === "numpad" || leccion?.distribucionUS || leccion?.secuencia) e.preventDefault();
           }}
           onPaste={(e) => e.preventDefault()}
           autoComplete="off"
@@ -469,7 +499,7 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       </div>
 
       <div className="leccion-metricas"><span><strong>{escrito.length}</strong> / {leccion.texto.length}</span><span><strong>{precision}%</strong> precisión</span><span><strong>{wpmActual}</strong> PPM</span><span><strong>{tiempoVisible}</strong> tiempo</span></div>
-      {verTeclado && <Teclado siguiente={siguiente} activas={activas} modo={leccion.modo} />}
+      {verTeclado && (leccion.secuencia ? <div className="teclado teclado-especial"><p>Acción esperada: <strong>{String(siguiente ?? "Lección terminada").replace("SHIFT_LEFT","Shift izquierdo").replace("SHIFT_RIGHT","Shift derecho").replace("SHIFT+Digit","Shift+").replace("CTRL+","Ctrl+").replace("ALT+","Alt+")}</strong></p><p>Usa el teclado físico para completar la combinación.</p></div> : <Teclado siguiente={siguiente} activas={activas} modo={leccion.modo} />)}
       {terminado && <div className="leccion-final"><span>{aprobada ? "Lección completada" : "Sigue practicando"}</span><strong>{wpmActual} PPM</strong><span>{precision}% precisión · {tiempoVisible}</span><div className="leccion-final-acciones"><button onClick={() => abrir(actual!)}>Repetir</button>{aprobada && actual! + 1 < lecciones.length && <button onClick={() => abrir(actual! + 1)}>Siguiente lección</button>}<button className="secundario" onClick={() => setActual(null)}>Volver al curso</button></div></div>}
     </div>
   );
