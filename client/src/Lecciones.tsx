@@ -234,13 +234,26 @@ export default function Lecciones({ usuario, fuente, tamano, onFuente, onTamano 
       else if (e.altKey && /^[a-z]$/i.test(e.key)) accion = "ALT+" + e.key.toUpperCase();
       else if (e.shiftKey && /^Digit[0-9]$/.test(codigo)) accion = "SHIFT+" + codigo;
       else if (e.shiftKey && /^Key[A-Z]$/.test(codigo)) accion = "SHIFT+" + e.key.toUpperCase();
-      if (accion || e.key === "Control" || e.key === "Alt" || e.key === "Shift" || e.key.length === 1) {
+      if (e.key === "Control" || e.key === "Alt" || (e.key === "Shift" && !leccion.secuencia[escrito.length]?.startsWith("SHIFT_LEFT") && !leccion.secuencia[escrito.length]?.startsWith("SHIFT_RIGHT"))) {
+        e.preventDefault(); e.stopPropagation(); return;
+      }
+      if (accion || e.key === "Shift" || e.key.length === 1) {
         e.preventDefault(); e.stopPropagation();
         if (terminado) return;
         const esperado = leccion.secuencia[escrito.length];
         const acierto = accion === esperado;
         if (inicioRef.current === null) inicioRef.current = Date.now();
         setEscrito((actual) => actual + (acierto ? "✓" : "×"));
+        if (escrito.length + 1 === leccion.secuencia.length) {
+          const precisionFinal = Math.round(((correctos + (acierto ? 1 : 0)) / leccion.secuencia.length) * 100);
+          if (precisionFinal >= META && actual !== null) {
+            const nuevoProgreso = actual + 1;
+            if (nuevoProgreso > completadas) {
+              setProgreso((p) => ({ ...p, especial: Math.max(p.especial, nuevoProgreso) }));
+              guardar(CLAVE_PROGRESO.especial + "_" + usuario, String(nuevoProgreso));
+            }
+          }
+        }
         return;
       }
       if (e.key === "Tab" || e.key === "Enter") e.preventDefault();
