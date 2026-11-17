@@ -8,7 +8,7 @@ const CATEGORIAS_VALIDAS = new Set(["letras", "puntuacion", "numeros", "operacio
 
 entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada, res) => {
   try {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       res.status(503).json({ error: "El entrenador IA todavía no está configurado en el servidor." });
       return;
@@ -75,38 +75,42 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
       "Cambia el tema y la redacción respecto a ejercicios típicos; evita repetir frases genéricas."
     ].filter(Boolean).join("\n");
 
-    const respuesta = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-6-astra",
-        instructions: instrucciones,
-        input: "Genera el siguiente ejercicio de mecanografía.",
-        max_output_tokens: 650
-      }),
-      signal: AbortSignal.timeout(30000)
-    });
+    const modelo = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+    const respuesta = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "x-goog-api-key": apiKey,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: instrucciones }] },
+          contents: [{ role: "user", parts: [{ text: "Genera el siguiente ejercicio de mecanografía." }] }],
+          generationConfig: {
+            maxOutputTokens: 700,
+            temperature: 0.9
+          }
+        }),
+        signal: AbortSignal.timeout(30000)
+      }
+    );
 
     const datos: any = await respuesta.json().catch(() => ({}));
     if (!respuesta.ok) {
-      console.error("Error del proveedor IA:", respuesta.status, datos?.error?.message ?? "sin detalle");
+      console.error("Error de Gemini:", respuesta.status, datos?.error?.message ?? "sin detalle");
       res.status(502).json({ error: "No se pudo generar el texto inteligente." });
       return;
     }
 
-    const texto = typeof datos.output_text === "string"
-      ? datos.output_text.trim()
-      : (datos.output ?? [])
-          .flatMap((item: any) => item.content ?? [])
-          .filter((item: any) => item.type === "output_text" && typeof item.text === "string")
-          .map((item: any) => item.text)
-          .join("\n")
-          .trim();
+    const texto = (datos.candidates?.[0]?.content?.parts ?? [])
+      .filter((parte: any) => typeof parte.text === "string")
+      .map((parte: any) => parte.text)
+      .join("\n")
+      .trim();
 
     if (!texto || texto.length < 80) {
+      console.error("Gemini no devolvió texto utilizable:", datos.candidates?.[0]?.finishReason ?? "respuesta vacía");
       res.status(502).json({ error: "La IA no devolvió un ejercicio suficientemente largo." });
       return;
     }
