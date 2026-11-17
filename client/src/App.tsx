@@ -12,6 +12,8 @@ import {
   guardarConfianzaTeclas,
   pedirHistorial,
   pedirRanking,
+  pedirConfianzaTeclas,
+  generarTextoEntrenador,
 } from "./api";
 
 const TEXTOS = [
@@ -119,6 +121,8 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
     return v === "Tab" || v === "Control" || v === "Shift" ? v : "Tab";
   });
   const [texto, setTexto] = useState(() => generarTexto(12 * DURACION, categorias));
+  const [generandoTexto, setGenerandoTexto] = useState(false);
+  const solicitudTextoRef = useRef(0);
   const [escrito, setEscrito] = useState("");
   const [tiempo, setTiempo] = useState(duracion);
   const [transcurrido, setTranscurrido] = useState(0);
@@ -146,9 +150,24 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
   const wpm = Math.round(correctos / 5 / (segundosUsados / 60));
   const precision = escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
+  async function prepararTexto(longitud: number) {
+    const solicitud = ++solicitudTextoRef.current;
+    setGenerandoTexto(true);
+    try {
+      const teclas = await pedirConfianzaTeclas();
+      const generado = await generarTextoEntrenador(categorias, teclas, Math.min(1800, Math.max(250, longitud)));
+      if (solicitud === solicitudTextoRef.current) setTexto(generado);
+    } catch (error) {
+      console.warn("Se utilizará el generador local de práctica:", error);
+      if (solicitud === solicitudTextoRef.current) setTexto(generarTexto(longitud, categorias));
+    } finally {
+      if (solicitud === solicitudTextoRef.current) setGenerandoTexto(false);
+    }
+  }
+
   function reiniciar(nuevaDuracion = duracion) {
     guardarConfianzaActual();
-    setTexto(generarTexto(nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12), categorias));
+    void prepararTexto(nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12));
     setEscrito("");
     setTiempo(nuevaDuracion);
     setTranscurrido(0);
@@ -160,7 +179,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
   }
 
   useEffect(() => {
-    setTexto(generarTexto(duracion === 0 ? 1200 : Math.max(500, duracion * 12), categorias));
+    void prepararTexto(duracion === 0 ? 1200 : Math.max(500, duracion * 12));
     setEscrito("");
     setTiempo(duracion);
     setTranscurrido(0);
@@ -292,6 +311,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
       </div>
       <h1>PRÁCTICA</h1>
       <p className="tiempo">{duracion === 0 ? tiempoVisible : tiempo + "s"}</p>
+      {generandoTexto && <p className="texto-generando">Preparando ejercicio personalizado…</p>}
       <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">
         <p className="texto texto-flotante" aria-label={texto}>
           {texto.split("").map((letra, i) => {
@@ -301,7 +321,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
           })}
           {escrito.length === texto.length && <span className="cursor-escritura cursor-final" aria-hidden="true" />}
         </p>
-        <input ref={inputRef} className="input-escritura-invisible" type="text" value={escrito} onChange={manejarCambio} onKeyDown={manejarTecla} onPaste={(e) => e.preventDefault()} disabled={terminado} autoComplete="off" autoCapitalize="off" spellCheck={false} autoFocus aria-label="Escribe aquí el texto de la prueba libre" />
+        <input ref={inputRef} className="input-escritura-invisible" type="text" value={escrito} onChange={manejarCambio} onKeyDown={manejarTecla} onPaste={(e) => e.preventDefault()} disabled={terminado || generandoTexto} autoComplete="off" autoCapitalize="off" spellCheck={false} autoFocus aria-label="Escribe aquí el texto de la prueba libre" />
       </div>
       {terminado && <div className="resultado"><div><strong>{wpm}</strong>WPM</div><div><strong>{precision}%</strong>Precisión</div></div>}
       <div className="paneles paneles-resultados">
