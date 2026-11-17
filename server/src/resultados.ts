@@ -139,10 +139,22 @@ resultadosRouter.get("/resumen", verificarToken, async (req: PeticionAutenticada
 resultadosRouter.get("/historial", verificarToken, async (req: PeticionAutenticada, res) => {
   try {
     const resultado = await pool.query(
-      `SELECT id, wpm, precision, segundos, creado_en
-       FROM resultados
-       WHERE usuario_id = $1
-       ORDER BY creado_en DESC LIMIT 50`,
+      `WITH ultimas AS (
+         SELECT id, wpm, precision, segundos, creado_en
+         FROM resultados WHERE usuario_id = $1
+         ORDER BY creado_en DESC LIMIT 5
+       ), mejor AS (
+         SELECT id, wpm, precision, segundos, creado_en
+         FROM resultados WHERE usuario_id = $1
+         ORDER BY wpm DESC, creado_en DESC LIMIT 1
+       )
+       SELECT id, wpm, precision, segundos, creado_en
+       FROM (
+         SELECT * FROM ultimas
+         UNION
+         SELECT * FROM mejor
+       ) AS seleccion
+       ORDER BY creado_en DESC`,
       [req.usuario!.id]
     );
     res.json(resultado.rows);
