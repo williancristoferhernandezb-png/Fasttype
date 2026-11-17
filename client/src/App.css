@@ -1487,3 +1487,5 @@ html, body, #root { min-height: 100%; }
   .selector-categorias-nav { order:4; }
   .selector-categorias-nav summary b { max-width:130px; }
 }
+
+.texto-generando { margin: -8px 0 12px; color: var(--verde); font-size: 11px; letter-spacing: .03em; text-align: center; }
