@@ -53,7 +53,10 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
 
     const instrucciones = [
       "Eres el generador de ejercicios de mecanografía de Fasttype.",
-      "Escribe un único texto de práctica en español, natural, coherente, variado y fácil de leer.",
+      "Escribe un texto de práctica en español que sea genuinamente coherente: debe desarrollar una sola situación, tema o pequeña historia de principio a fin, con ideas conectadas y una progresión lógica.",
+      "Cada oración debe relacionarse con la anterior. Mantén consistencia de personajes, lugar, tiempo y hechos; no saltes entre temas ni combines frases independientes.",
+      "Usa lenguaje natural, claro y variado, como un fragmento de un artículo, relato o explicación escrito por una persona. Evita frases genéricas, repeticiones, listas disfrazadas de párrafos y combinaciones aleatorias de palabras.",
+      "El contenido debe tener sentido incluso cuando se lea como un texto normal, no como una colección de ejercicios. Prioriza siempre la calidad narrativa sobre la repetición de teclas.",
       "Devuelve únicamente el texto, sin título, introducción, comillas, viñetas ni explicaciones.",
       "Respeta estrictamente las categorías seleccionadas: " + categorias.map((c: string) => nombres[c]).join("; ") + ".",
       categorias.includes("letras") && !categorias.includes("puntuacion")
@@ -63,13 +66,13 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
         ? "Incluye signos de puntuación variados de forma natural: comas, puntos, dos puntos, punto y coma, interrogaciones y exclamaciones."
         : "",
       categorias.includes("numeros")
-        ? "Incluye suficientes dígitos y grupos numéricos reales; no los sustituyas por palabras escritas."
+        ? "Integra dígitos y cantidades dentro de la misma situación coherente (por ejemplo, horarios, medidas, distancias, precios o resultados); no generes cadenas de números sin contexto."
         : "",
       categorias.includes("operaciones")
-        ? "Incluye expresiones matemáticas con +, -, *, / y =, además de números."
+        ? "Integra operaciones matemáticas reales con +, -, *, / y = en una situación que las explique (por ejemplo, un presupuesto, inventario o cálculo); cada operación debe tener sentido dentro del texto."
         : "",
       teclasDebiles.length
-        ? "Refuerza de manera natural estas teclas débiles, sin crear secuencias artificiales y solo cuando correspondan a las categorías seleccionadas: " + teclasDebiles.map((t: any) => t.etiqueta + " (" + t.precision + "% de precisión en " + t.intentos + " intentos)").join(", ") + "."
+        ? "Refuerza de manera discreta estas teclas débiles dentro de palabras y frases naturales, sin alterar la coherencia del texto y solo cuando correspondan a las categorías seleccionadas: " + teclasDebiles.map((t: any) => t.etiqueta + " (" + t.precision + "% de precisión en " + t.intentos + " intentos)").join(", ") + "."
         : "No se proporcionaron teclas con una muestra suficiente de dificultad; prioriza un texto equilibrado.",
       "Longitud aproximada: " + longitud + " caracteres.",
       "Cambia el tema y la redacción respecto a ejercicios típicos; evita repetir frases genéricas."
@@ -89,7 +92,7 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
           contents: [{ role: "user", parts: [{ text: "Genera el siguiente ejercicio de mecanografía." }] }],
           generationConfig: {
             maxOutputTokens: 700,
-            temperature: 0.9
+            temperature: 0.65
           }
         }),
         signal: AbortSignal.timeout(30000)
