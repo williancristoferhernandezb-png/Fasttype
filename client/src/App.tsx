@@ -240,10 +240,9 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
     guardarConfianzaActual();
   }, [terminado, escrito.length]);
 
-  function manejarCambio(e: React.ChangeEvent<HTMLInputElement>) {
-    if (terminado) return;
-    if (!iniciado) setIniciado(true);
-    const nuevoTexto = e.target.value;
+  function actualizarEscritura(nuevoTexto: string) {
+    if (terminado || generandoTexto) return;
+    if (!iniciado && nuevoTexto.length > 0) setIniciado(true);
     setEscrito(nuevoTexto);
     if (duracion === 0 && texto.length - nuevoTexto.length < 120) {
       const textoExtra = " " + textoAleatorio(categorias);
@@ -251,8 +250,12 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
     }
   }
 
+  function manejarCambio(e: React.ChangeEvent<HTMLInputElement>) {
+    actualizarEscritura(e.target.value);
+  }
+
   function manejarTecla(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (!terminado && !e.repeat && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
+    if (!terminado && !generandoTexto && !e.repeat && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey && e.code) {
       const esperado = texto[escrito.length];
       const codigoBase = codigoTeclaEsperada(esperado);
       const codigo = e.key === esperado && e.code.startsWith("Numpad") ? e.code : codigoBase;
@@ -265,14 +268,59 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
         confianzaTeclasRef.current[codigo] = registro;
       }
     }
-    const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
-      : teclaReinicio === "Shift" ? e.key === "Shift"
-      : e.key === "Control" && !e.altKey && !e.metaKey;
-    if (coincide) {
-      e.preventDefault();
-      reiniciar();
-    }
   }
+
+  // Captura las teclas a nivel de ventana: Tab no cambia el foco y se puede
+  // escribir desde cualquier zona de la pantalla de práctica.
+  useEffect(() => {
+    function manejarTecladoGlobal(e: KeyboardEvent) {
+      const coincide = teclaReinicio === "Tab" ? e.key === "Tab"
+        : teclaReinicio === "Shift" ? e.key === "Shift"
+        : e.key === "Control" && !e.altKey && !e.metaKey;
+
+      if (coincide) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        reiniciar();
+        return;
+      }
+
+      if (terminado || generandoTexto || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+
+      const destino = e.target as HTMLElement | null;
+      const esCampoEditable = Boolean(destino?.closest("input, textarea, select, [contenteditable='true']"));
+      if (esCampoEditable && destino !== inputRef.current) return;
+      if (destino === inputRef.current) return;
+
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        actualizarEscritura(escrito.slice(0, -1));
+        inputRef.current?.focus();
+        return;
+      }
+
+      if (e.key.length !== 1) return;
+
+      e.preventDefault();
+      const esperado = texto[escrito.length];
+      const codigoBase = codigoTeclaEsperada(esperado);
+      const codigo = e.key === esperado && e.code.startsWith("Numpad") ? e.code : codigoBase;
+      if (codigo) {
+        const etiqueta = esperado === " " ? "ESP" : esperado.toLocaleUpperCase().slice(0, 4);
+        const registro = confianzaTeclasRef.current[codigo] ?? { etiqueta, aciertos: 0, intentos: 0 };
+        registro.etiqueta = etiqueta;
+        registro.intentos += 1;
+        if (e.key === esperado && (e.code === codigoBase || e.code === codigo)) registro.aciertos += 1;
+        confianzaTeclasRef.current[codigo] = registro;
+      }
+      actualizarEscritura(escrito + e.key);
+      inputRef.current?.focus();
+    }
+
+    window.addEventListener("keydown", manejarTecladoGlobal, true);
+    return () => window.removeEventListener("keydown", manejarTecladoGlobal, true);
+  }, [teclaReinicio, terminado, generandoTexto, escrito, texto, iniciado, duracion, categorias]);
 
   const tiempoVisible = duracion === 0
     ? Math.floor(transcurrido / 60) + ":" + String(transcurrido % 60).padStart(2, "0")
