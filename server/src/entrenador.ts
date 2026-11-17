@@ -69,7 +69,7 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
         ? "Incluye expresiones matemáticas con +, -, *, / y =, además de números."
         : "",
       teclasDebiles.length
-        ? "Refuerza de manera natural estas teclas débiles, sin crear secuencias artificiales: " + teclasDebiles.map((t: any) => t.etiqueta + " (" + t.precision + "% de precisión en " + t.intentos + " intentos)").join(", ") + "."
+        ? "Refuerza de manera natural estas teclas débiles, sin crear secuencias artificiales y solo cuando correspondan a las categorías seleccionadas: " + teclasDebiles.map((t: any) => t.etiqueta + " (" + t.precision + "% de precisión en " + t.intentos + " intentos)").join(", ") + "."
         : "No se proporcionaron teclas con una muestra suficiente de dificultad; prioriza un texto equilibrado.",
       "Longitud aproximada: " + longitud + " caracteres.",
       "Cambia el tema y la redacción respecto a ejercicios típicos; evita repetir frases genéricas."
