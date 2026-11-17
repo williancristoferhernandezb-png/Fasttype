@@ -119,7 +119,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
   const [texto, setTexto] = useState(() => generarTexto(12 * DURACION, categorias));
   const [generandoTexto, setGenerandoTexto] = useState(true);
   const colaTextosRef = useRef<string[]>([]);
-  const cargandoLoteRef = useRef(false);
+  const cargandoLoteRef = useRef<number | null>(null);
   const versionColaRef = useRef(0);
   const [velocidadSuave, setVelocidadSuave] = useState(0);
   const [escrito, setEscrito] = useState("");
@@ -140,8 +140,8 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
   const precision = escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
   async function cargarLoteTextos(version: number, longitud: number) {
-    if (cargandoLoteRef.current) return;
-    cargandoLoteRef.current = true;
+    if (cargandoLoteRef.current === version) return;
+    cargandoLoteRef.current = version;
     try {
       const lote = await Promise.all(Array.from({ length: 3 }, async () => {
         try {
@@ -153,7 +153,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
       }));
       if (version === versionColaRef.current) colaTextosRef.current.push(...lote);
     } finally {
-      cargandoLoteRef.current = false;
+      if (cargandoLoteRef.current === version) cargandoLoteRef.current = null;
     }
   }
 
@@ -170,7 +170,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
     if (siguiente) setTexto(siguiente);
     // Al consumir el segundo de los tres ejercicios, se solicita otro lote
     // completo en segundo plano para que la reserva no llegue a vaciarse.
-    if (colaTextosRef.current.length <= 1 && !cargandoLoteRef.current) {
+    if (colaTextosRef.current.length <= 1 && cargandoLoteRef.current !== version) {
       void cargarLoteTextos(version, nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12));
     }
     setEscrito("");
@@ -187,7 +187,6 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
     guardarConfianzaActual();
     const version = ++versionColaRef.current;
     colaTextosRef.current = [];
-    cargandoLoteRef.current = false;
     setGenerandoTexto(true);
     setEscrito("");
     setTiempo(duracion);
