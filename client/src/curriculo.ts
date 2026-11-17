@@ -5,7 +5,7 @@ import { ETAPAS_SIMBOLOS } from "./curriculoSimbolos";
 // "alfa"   → lecciones alfanuméricas (letras)
 // "numpad" → lecciones numéricas, versión A (teclado numérico lateral)
 // "fila"   → lecciones numéricas, versión B (fila superior 1 al 0)
-export type Modo = "alfa" | "numpad" | "fila";
+export type Modo = "alfa" | "numpad" | "fila" | "especial";
 
 export interface Leccion {
   id: number;
@@ -15,6 +15,7 @@ export interface Leccion {
   texto: string;
   modo: Modo;
   distribucionUS?: boolean;
+  secuencia?: string[];
 }
 
 export interface Etapa {
@@ -443,8 +444,19 @@ function construir(etapas: Etapa[], modo: Modo): Leccion[] {
 
   return lista;
 }
+
+const ETAPAS_ESPECIALES: Leccion[] = [
+  { id: 1, etapa: "Shift", titulo: "Shift: ambas manos", instruccion: "Pulsa Shift izquierdo y derecho. Cada paso espera una pulsación física real.", texto: "SHIFT IZQUIERDO · SHIFT DERECHO", modo: "especial", secuencia: ["SHIFT_LEFT","SHIFT_RIGHT","SHIFT_LEFT","SHIFT_RIGHT","SHIFT_LEFT","SHIFT_RIGHT"] },
+  { id: 2, etapa: "Shift", titulo: "Mayúsculas con Shift", instruccion: "Mantén Shift y pulsa la letra indicada. Alterna las manos cuando sea posible.", texto: "SHIFT+A · SHIFT+S · SHIFT+D · SHIFT+J · SHIFT+K · SHIFT+L", modo: "especial", secuencia: ["SHIFT+A","SHIFT+S","SHIFT+D","SHIFT+J","SHIFT+K","SHIFT+L"] },
+  { id: 3, etapa: "Shift", titulo: "Símbolos superiores", instruccion: "Mantén Shift mientras pulsas la tecla numérica para producir el símbolo.", texto: "SHIFT+1 · SHIFT+2 · SHIFT+3 · SHIFT+4 · SHIFT+5 · SHIFT+6 · SHIFT+7 · SHIFT+8 · SHIFT+9 · SHIFT+0", modo: "especial", secuencia: ["SHIFT+Digit1","SHIFT+Digit2","SHIFT+Digit3","SHIFT+Digit4","SHIFT+Digit5","SHIFT+Digit6","SHIFT+Digit7","SHIFT+Digit8","SHIFT+Digit9","SHIFT+Digit0"] },
+  { id: 4, etapa: "Backspace", titulo: "Borrar con Backspace", instruccion: "Pulsa Backspace una vez por cada paso. La tecla se registra como acción; no borra el ejercicio.", texto: "BACKSPACE · BACKSPACE · BACKSPACE · BACKSPACE · BACKSPACE · BACKSPACE", modo: "especial", secuencia: ["BACKSPACE","BACKSPACE","BACKSPACE","BACKSPACE","BACKSPACE","BACKSPACE"] },
+  { id: 5, etapa: "Ctrl", titulo: "Combinaciones con Ctrl", instruccion: "Mantén Ctrl y pulsa la letra indicada. Se comprueba la combinación real.", texto: "CTRL+C · CTRL+V · CTRL+Z · CTRL+A", modo: "especial", secuencia: ["CTRL+C","CTRL+V","CTRL+Z","CTRL+A"] },
+  { id: 6, etapa: "Alt", titulo: "Combinaciones con Alt", instruccion: "Mantén Alt y pulsa la letra indicada. Fasttype captura la combinación sin activar acciones del navegador.", texto: "ALT+Q · ALT+W · ALT+E · ALT+R", modo: "especial", secuencia: ["ALT+Q","ALT+W","ALT+E","ALT+R"] },
+  { id: 7, etapa: "Dominio", titulo: "Todas las teclas especiales", instruccion: "Completa la secuencia combinando Shift, Backspace, Ctrl y Alt.", texto: "SHIFT+A · BACKSPACE · CTRL+C · ALT+Q · SHIFT+Digit1 · CTRL+V · ALT+W · BACKSPACE", modo: "especial", secuencia: ["SHIFT+A","BACKSPACE","CTRL+C","ALT+Q","SHIFT+Digit1","CTRL+V","ALT+W","BACKSPACE"] },
+];
 export const CURSOS: Record<Modo, Leccion[]> = {
   alfa: construir([...ETAPAS_ALFA, ...ETAPAS_SIMBOLOS], "alfa"),
   numpad: construir(ETAPAS_NUMPAD, "numpad"),
   fila: construir(ETAPAS_FILA, "fila"),
+  especial: ETAPAS_ESPECIALES,
 };
