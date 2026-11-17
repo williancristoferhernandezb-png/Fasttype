@@ -4,7 +4,7 @@ import {
   type ResumenPerfil, type ResultadoPractica, type EntradaRanking, type ActividadDiaria, type ConfianzaTecla,
 } from "./api";
 
-type Props = { usuario: string; onInicio: () => void; onSalir: () => void };
+type Props = { usuario: string; onInicio: () => void; onLecciones: () => void; onSalir: () => void };
 
 function tiempoLegible(segundos: number) {
   const total = Math.max(0, Math.floor(segundos));
@@ -25,31 +25,36 @@ function GraficaMejora({ actividad }: { actividad: ActividadDiaria[] }) {
   if (datos.length < 2) {
     return <p className="perfil-vacio">Necesitas practicar en al menos dos días distintos para mostrar tu evolución.</p>;
   }
-  const valores = datos.map(d => d.promedio_wpm);
-  const max = Math.max(...valores, 1);
-  const min = Math.min(...valores, 0);
-  const rango = Math.max(max - min, 5);
-  const puntos = valores.map((v, i) => {
+  const valoresVelocidad = datos.map(d => d.promedio_wpm);
+  const valoresPrecision = datos.map(d => d.promedio_precision);
+  const puntos = (valores: number[], min: number, max: number) => valores.map((v, i) => {
     const x = 12 + (i * 576) / Math.max(valores.length - 1, 1);
-    const y = 112 - ((v - min) / rango) * 88;
+    const y = 112 - ((v - min) / Math.max(max - min, 1)) * 88;
     return [x, y] as const;
   });
-  const linea = puntos.map(([x, y]) => `${x},${y}`).join(" ");
-  const area = `12,120 ${linea} 588,120`;
+  const minVelocidad = Math.min(...valoresVelocidad, 0);
+  const maxVelocidad = Math.max(...valoresVelocidad, 1);
+  const puntosVelocidad = puntos(valoresVelocidad, minVelocidad, maxVelocidad);
+  const puntosPrecision = puntos(valoresPrecision, 0, 100);
+  const linea = (ps: readonly (readonly [number, number])[]) => ps.map(([x,y]) => `${x},${y}`).join(" ");
+  const ultima = datos[datos.length - 1];
   return (
     <div className="perfil-grafica-wrap">
       <div className="perfil-grafica-resumen">
-        <strong>{datos[datos.length - 1].promedio_wpm} <small>PPM</small></strong>
-        <span>Promedio de la última jornada registrada</span>
+        <strong>{ultima.promedio_wpm} <small>PPM</small></strong>
+        <span>Velocidad promedio</span>
+        <strong>{ultima.promedio_precision}%</strong>
+        <span>Precisión promedio</span>
       </div>
-      <svg className="perfil-grafica" viewBox="0 0 600 130" role="img" aria-label="Evolución del promedio de palabras por minuto por día">
-        <defs><linearGradient id="perfil-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#b6ff00" stopOpacity=".22"/><stop offset="100%" stopColor="#b6ff00" stopOpacity="0"/></linearGradient></defs>
+      <svg className="perfil-grafica" viewBox="0 0 600 130" role="img" aria-label="Evolución diaria de velocidad y precisión">
         {[24,68,112].map(y => <line key={y} x1="12" x2="588" y1={y} y2={y} stroke="rgba(255,255,255,.08)" strokeDasharray="3 5"/>)}
-        <polygon points={area} fill="url(#perfil-area)"/>
-        <polyline points={linea} fill="none" stroke="#b6ff00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        {puntos.map(([x,y],i) => <circle key={i} cx={x} cy={y} r="3" fill="#b6ff00"/>)}
+        <polyline points={linea(puntosVelocidad)} fill="none" stroke="#b6ff00" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <polyline points={linea(puntosPrecision)} fill="none" stroke="#55b8ff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+        {puntosVelocidad.map(([x,y],i) => <circle key={`v${i}`} cx={x} cy={y} r="3" fill="#b6ff00"/>)}
+        {puntosPrecision.map(([x,y],i) => <circle key={`p${i}`} cx={x} cy={y} r="3" fill="#55b8ff"/>)}
       </svg>
-      <div className="perfil-grafica-fechas"><span>{fechaLocal(datos[0].fecha).toLocaleDateString()}</span><span>{fechaLocal(datos[datos.length-1].fecha).toLocaleDateString()}</span></div>
+      <div className="perfil-grafica-leyenda"><span><i className="leyenda-velocidad"/>Velocidad (PPM)</span><span><i className="leyenda-precision"/>Precisión (%)</span></div>
+      <div className="perfil-grafica-fechas"><span>{fechaLocal(datos[0].fecha).toLocaleDateString()}</span><span>{fechaLocal(ultima.fecha).toLocaleDateString()}</span></div>
     </div>
   );
 }
@@ -119,7 +124,7 @@ function TecladoConfianza({ datos }: { datos: ConfianzaTecla[] }) {
   );
 }
 
-export default function Perfil({ usuario, onInicio, onSalir }: Props) {
+export default function Perfil({ usuario, onInicio, onLecciones, onSalir }: Props) {
   const [resumen, setResumen] = useState<ResumenPerfil | null>(null);
   const [historial, setHistorial] = useState<ResultadoPractica[]>([]);
   const [ranking, setRanking] = useState<EntradaRanking[]>([]);
@@ -151,8 +156,9 @@ export default function Perfil({ usuario, onInicio, onSalir }: Props) {
         <a className="marca" href="#" onClick={(e) => e.preventDefault()}>FAST<span>TYPE</span><i>.</i></a>
         <h1 className="perfil-titulo">PERFIL</h1>
         <div className="topbar-derecha">
-          <button className="boton-texto" onClick={onInicio}>← INICIO</button>
-          <span className="usuario-chip">{usuario}</span>
+          <button className="boton-texto" onClick={onInicio}>PRÁCTICA</button>
+          <button className="boton-texto" onClick={onLecciones}>LECCIONES</button>
+          <button className="usuario-chip usuario-chip-perfil" type="button" title="Estás en tu perfil">{usuario}</button>
           <button className="boton-salir" onClick={onSalir}>Salir</button>
         </div>
       </header>
@@ -173,7 +179,7 @@ export default function Perfil({ usuario, onInicio, onSalir }: Props) {
 
           <div className="perfil-actividad-grid">
             <section className="perfil-seccion perfil-panel">
-              <div className="perfil-seccion-titulo"><div><p className="eyebrow">02 / PROGRESO</p><h2>EVOLUCIÓN DE VELOCIDAD</h2></div><span>Promedio diario · últimos 30 días activos</span></div>
+              <div className="perfil-seccion-titulo"><div><p className="eyebrow">02 / PROGRESO</p><h2>EVOLUCIÓN DE VELOCIDAD Y PRECISIÓN</h2></div><span>Promedio diario · últimos 30 días activos</span></div>
               <GraficaMejora actividad={actividad}/>
             </section>
             <section className="perfil-seccion perfil-panel">
@@ -190,11 +196,11 @@ export default function Perfil({ usuario, onInicio, onSalir }: Props) {
 
           <div className="perfil-dos-columnas">
             <section className="perfil-seccion perfil-panel">
-              <div className="perfil-seccion-titulo"><div><p className="eyebrow">05 / ACTIVIDAD</p><h2>HISTORIAL RECIENTE</h2></div><span>Últimas 50 pruebas</span></div>
+              <div className="perfil-seccion-titulo"><div><p className="eyebrow">05 / ACTIVIDAD</p><h2>HISTORIAL RECIENTE</h2></div><span>Últimas 5 y mejor marca</span></div>
               {historial.length === 0 ? <p className="perfil-vacio">Aún no tienes pruebas registradas. Completa una prueba libre para comenzar tu historial.</p> :
                 <div className="perfil-tabla-wrap"><table className="perfil-tabla">
                   <thead><tr><th>FECHA</th><th>VELOCIDAD</th><th>PRECISIÓN</th><th>DURACIÓN</th></tr></thead>
-                  <tbody>{historial.map(r=><tr key={r.id}><td>{new Date(r.creado_en).toLocaleDateString()}</td><td><strong>{r.wpm} PPM</strong></td><td>{r.precision}%</td><td>{tiempoLegible(r.segundos)}</td></tr>)}</tbody>
+                  <tbody>{[...historial.slice(0,5), ...historial.filter(r => r.wpm === Math.max(...historial.map(x => x.wpm))).slice(0,1).filter(mejor => !historial.slice(0,5).some(r => r.id === mejor.id))].map(r=><tr key={r.id}><td>{new Date(r.creado_en).toLocaleDateString()}</td><td><strong>{r.wpm} PPM</strong></td><td>{r.precision}%</td><td>{tiempoLegible(r.segundos)}</td></tr>)}</tbody>
                 </table></div>}
             </section>
             <section className="perfil-seccion perfil-panel">
