@@ -159,6 +159,7 @@ resultadosRouter.get("/actividad", verificarToken, async (req: PeticionAutentica
       `SELECT DATE(creado_en AT TIME ZONE 'UTC')::text AS fecha,
               COUNT(*)::int AS practicas,
               ROUND(AVG(wpm))::int AS promedio_wpm,
+              ROUND(AVG(precision))::int AS promedio_precision,
               MAX(wpm)::int AS mejor_wpm
        FROM resultados
        WHERE usuario_id = $1
