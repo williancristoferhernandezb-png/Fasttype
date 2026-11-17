@@ -200,7 +200,7 @@ export default function Perfil({ usuario, onInicio, onLecciones, onSalir }: Prop
               {historial.length === 0 ? <p className="perfil-vacio">Aún no tienes pruebas registradas. Completa una prueba libre para comenzar tu historial.</p> :
                 <div className="perfil-tabla-wrap"><table className="perfil-tabla">
                   <thead><tr><th>FECHA</th><th>VELOCIDAD</th><th>PRECISIÓN</th><th>DURACIÓN</th></tr></thead>
-                  <tbody>{[...historial.slice(0,5), ...historial.filter(r => r.wpm === Math.max(...historial.map(x => x.wpm))).slice(0,1).filter(mejor => !historial.slice(0,5).some(r => r.id === mejor.id))].map(r=><tr key={r.id}><td>{new Date(r.creado_en).toLocaleDateString()}</td><td><strong>{r.wpm} PPM</strong></td><td>{r.precision}%</td><td>{tiempoLegible(r.segundos)}</td></tr>)}</tbody>
+                  <tbody>{historial.map(r=><tr key={r.id}><td>{new Date(r.creado_en).toLocaleDateString()}</td><td><strong>{r.wpm} PPM</strong></td><td>{r.precision}%</td><td>{tiempoLegible(r.segundos)}</td></tr>)}</tbody>
                 </table></div>}
             </section>
             <section className="perfil-seccion perfil-panel">
