@@ -6,6 +6,7 @@ import { toNodeHandler } from "better-auth/node";
 import { pool } from "./db";
 import { auth } from "./betterAuth";
 import { resultadosRouter, prepararTablaResultados } from "./resultados";
+import { entrenadorRouter } from "./entrenador";
 
 const app = express();
 const PUERTO = 3000;
@@ -26,6 +27,7 @@ app.use(express.json());
 
 // Rutas de resultados
 app.use("/api/resultados", resultadosRouter);
+app.use("/api/entrenador", entrenadorRouter);
 
 // Comprobar que el servidor funciona
 app.get("/api/salud", (_req, res) => {
