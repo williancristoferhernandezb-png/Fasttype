@@ -75,7 +75,7 @@ entrenadorRouter.post("/texto", verificarToken, async (req: PeticionAutenticada,
       "Cambia el tema y la redacción respecto a ejercicios típicos; evita repetir frases genéricas."
     ].filter(Boolean).join("\n");
 
-    const modelo = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+    const modelo = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
     const respuesta = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`,
       {
