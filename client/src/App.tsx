@@ -12,7 +12,6 @@ import {
   guardarConfianzaTeclas,
   pedirHistorial,
   pedirRanking,
-  pedirConfianzaTeclas,
   generarTextoEntrenador,
 } from "./api";
 
@@ -154,8 +153,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
     const solicitud = ++solicitudTextoRef.current;
     setGenerandoTexto(true);
     try {
-      const teclas = await pedirConfianzaTeclas();
-      const generado = await generarTextoEntrenador(categorias, teclas, Math.min(1800, Math.max(250, longitud)));
+      const generado = await generarTextoEntrenador(categorias, Math.min(1800, Math.max(250, longitud)));
       if (solicitud === solicitudTextoRef.current) setTexto(generado);
     } catch (error) {
       console.warn("Se utilizará el generador local de práctica:", error);
@@ -179,6 +177,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
   }
 
   useEffect(() => {
+    guardarConfianzaActual();
     void prepararTexto(duracion === 0 ? 1200 : Math.max(500, duracion * 12));
     setEscrito("");
     setTiempo(duracion);
