@@ -1489,3 +1489,11 @@ html, body, #root { min-height: 100%; }
 }
 
 .texto-generando { margin: -8px 0 12px; color: var(--verde); font-size: 11px; letter-spacing: .03em; text-align: center; }
+
+
+/* Leyenda de las dos métricas de progreso del perfil. */
+.perfil-grafica-leyenda { display:flex; flex-wrap:wrap; gap:14px; margin-top:8px; color:#849087; font-size:10px; }
+.perfil-grafica-leyenda span { display:flex; align-items:center; gap:6px; }
+.perfil-grafica-leyenda i { display:inline-block; width:8px; height:8px; border-radius:50%; }
+.perfil-grafica-leyenda .leyenda-velocidad { background:#b6ff00; }
+.perfil-grafica-leyenda .leyenda-precision { background:#55b8ff; }
