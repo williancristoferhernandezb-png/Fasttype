@@ -1508,3 +1508,14 @@ html, body, #root { min-height: 100%; }
   overflow-wrap: normal;
   hyphens: none;
 }
+
+
+/* Lecciones de teclas especiales: cada combinación se presenta como un paso. */
+.secuencia-especial { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; width:100%; padding:22px 8px; }
+.secuencia-especial span { padding:10px 13px; border:1px solid rgba(255,255,255,.12); border-radius:7px; color:#aab5aa; background:#171e19; font:600 13px 'Inter',sans-serif; }
+.secuencia-especial span.paso-actual { color:#10150e; border-color:var(--verde); background:var(--verde); }
+.secuencia-especial span.paso-correcto { color:#d9ff9b; border-color:rgba(182,255,0,.4); background:rgba(182,255,0,.12); }
+.secuencia-especial span.paso-error { color:#ff9dad; border-color:rgba(255,80,110,.4); background:rgba(255,80,110,.12); }
+.teclado-especial { min-height:70px; text-align:center; }
+.teclado-especial p { margin:4px; color:#8d9a8e; font-size:11px; }
+.teclado-especial strong { color:var(--verde); font-size:15px; }
