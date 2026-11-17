@@ -203,3 +203,27 @@ export async function pedirConfianzaTeclas(): Promise<ConfianzaTecla[]> {
   });
   return respuestaAuth<ConfianzaTecla[]>(res);
 }
+
+
+export async function generarTextoEntrenador(
+  categorias: string[],
+  teclas: ConfianzaTecla[],
+  longitud: number
+): Promise<string> {
+  const res = await fetch(`${API}/entrenador/texto`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({
+      categorias,
+      longitud,
+      teclas: teclas.map((t) => ({
+        etiqueta: t.etiqueta,
+        precision: t.precision,
+        intentos: t.intentos,
+      })),
+    }),
+  });
+  const datos = await respuestaAuth<{ texto: string }>(res);
+  return datos.texto;
+}
