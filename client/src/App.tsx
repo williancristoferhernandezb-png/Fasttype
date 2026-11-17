@@ -117,8 +117,11 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
     return v === "Tab" || v === "Control" || v === "Shift" ? v : "Tab";
   });
   const [texto, setTexto] = useState(() => generarTexto(12 * DURACION, categorias));
-  const [generandoTexto, setGenerandoTexto] = useState(false);
-  const solicitudTextoRef = useRef(0);
+  const [generandoTexto, setGenerandoTexto] = useState(true);
+  const colaTextosRef = useRef<string[]>([]);
+  const cargandoLoteRef = useRef(false);
+  const versionColaRef = useRef(0);
+  const [velocidadSuave, setVelocidadSuave] = useState(0);
   const [escrito, setEscrito] = useState("");
   const [tiempo, setTiempo] = useState(duracion);
   const [transcurrido, setTranscurrido] = useState(0);
@@ -136,23 +139,40 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
   const wpm = Math.round(correctos / 5 / (segundosUsados / 60));
   const precision = escrito.length === 0 ? 0 : Math.round((correctos / escrito.length) * 100);
 
-  async function prepararTexto(longitud: number) {
-    const solicitud = ++solicitudTextoRef.current;
-    setGenerandoTexto(true);
+  async function cargarLoteTextos(version: number, longitud: number) {
+    if (cargandoLoteRef.current) return;
+    cargandoLoteRef.current = true;
     try {
-      const generado = await generarTextoEntrenador(categorias, Math.min(1800, Math.max(250, longitud)));
-      if (solicitud === solicitudTextoRef.current) setTexto(generado);
-    } catch (error) {
-      console.warn("Se utilizará el generador local de práctica:", error);
-      if (solicitud === solicitudTextoRef.current) setTexto(generarTexto(longitud, categorias));
+      const lote = await Promise.all(Array.from({ length: 3 }, async () => {
+        try {
+          return await generarTextoEntrenador(categorias, Math.min(1800, Math.max(250, longitud)));
+        } catch (error) {
+          console.warn("Se utilizará el generador local para un texto:", error);
+          return generarTexto(longitud, categorias);
+        }
+      }));
+      if (version === versionColaRef.current) colaTextosRef.current.push(...lote);
     } finally {
-      if (solicitud === solicitudTextoRef.current) setGenerandoTexto(false);
+      cargandoLoteRef.current = false;
     }
   }
 
-  function reiniciar(nuevaDuracion = duracion) {
+  async function reiniciar(nuevaDuracion = duracion) {
     guardarConfianzaActual();
-    void prepararTexto(nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12));
+    const version = versionColaRef.current;
+    let siguiente = colaTextosRef.current.shift();
+    if (!siguiente) {
+      setGenerandoTexto(true);
+      await cargarLoteTextos(version, nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12));
+      siguiente = colaTextosRef.current.shift();
+      setGenerandoTexto(false);
+    }
+    if (siguiente) setTexto(siguiente);
+    // Al consumir el segundo de los tres ejercicios, se solicita otro lote
+    // completo en segundo plano para que la reserva no llegue a vaciarse.
+    if (colaTextosRef.current.length <= 1 && !cargandoLoteRef.current) {
+      void cargarLoteTextos(version, nuevaDuracion === 0 ? 1200 : Math.max(500, nuevaDuracion * 12));
+    }
     setEscrito("");
     setTiempo(nuevaDuracion);
     setTranscurrido(0);
@@ -165,7 +185,10 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
 
   useEffect(() => {
     guardarConfianzaActual();
-    void prepararTexto(duracion === 0 ? 1200 : Math.max(500, duracion * 12));
+    const version = ++versionColaRef.current;
+    colaTextosRef.current = [];
+    cargandoLoteRef.current = false;
+    setGenerandoTexto(true);
     setEscrito("");
     setTiempo(duracion);
     setTranscurrido(0);
@@ -173,6 +196,14 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
     guardadoRef.current = false;
     guardadoTeclasRef.current = false;
     confianzaTeclasRef.current = {};
+    void (async () => {
+      await cargarLoteTextos(version, duracion === 0 ? 1200 : Math.max(500, duracion * 12));
+      if (version === versionColaRef.current) {
+        const primero = colaTextosRef.current.shift();
+        if (primero) setTexto(primero);
+        setGenerandoTexto(false);
+      }
+    })();
   }, [categorias.join("|")]);
 
   function elegirDuracion(valor: number) {
@@ -195,6 +226,17 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
     localStorage.setItem("fasttype_tecla_reinicio", valor);
     setTimeout(() => inputRef.current?.focus(), 0);
   }
+
+  useEffect(() => {
+    const intervalo = window.setInterval(() => {
+      setVelocidadSuave((actual) => {
+        const diferencia = wpm - actual;
+        const siguiente = actual + diferencia * 0.16;
+        return Math.abs(diferencia) < 0.15 ? wpm : siguiente;
+      });
+    }, 180);
+    return () => window.clearInterval(intervalo);
+  }, [wpm]);
 
   useEffect(() => {
     if (!iniciado || terminado) return;
@@ -342,7 +384,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
       </div>
       <h1>PRÁCTICA</h1>
       <p className="tiempo">{duracion === 0 ? tiempoVisible : tiempo + "s"}</p>
-      {!terminado && <p className="velocidad-actual">{wpm} <span>PPM</span></p>}
+      {!terminado && <p className="velocidad-actual">{Math.round(velocidadSuave)} <span>PPM</span></p>}
       {generandoTexto && <p className="texto-generando">Preparando ejercicio personalizado…</p>}
       <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">
         <p className="texto texto-flotante" aria-label={texto}>
