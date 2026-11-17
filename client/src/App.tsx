@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import Login from "./Login";
-import Inicio from "./Inicio";
 import Lecciones from "./Lecciones";
 import Perfil from "./Perfil";
 import ControlesTexto, { estiloEscritura, type FuenteEscritura } from "./ControlesTexto";
@@ -10,8 +9,6 @@ import {
   cerrarSesion,
   guardarResultado,
   guardarConfianzaTeclas,
-  pedirHistorial,
-  pedirRanking,
   generarTextoEntrenador,
 } from "./api";
 
@@ -103,7 +100,7 @@ function SelectorCategorias({ categorias, onChange }: { categorias: CategoriaPra
   );
 }
 
-function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuente, tamano, onFuente, onTamano }: { usuario: string; categorias: CategoriaPractica[]; onCategoriasChange: (categorias: CategoriaPractica[]) => void; onSalir: () => void; onInicio: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
+function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, onPerfil, fuente, tamano, onFuente, onTamano }: { usuario: string; categorias: CategoriaPractica[]; onCategoriasChange: (categorias: CategoriaPractica[]) => void; onSalir: () => void; onLecciones: () => void; onPerfil: () => void; fuente: FuenteEscritura; tamano: number; onFuente: (v: FuenteEscritura) => void; onTamano: (v: number) => void }) {
   const [duracion, setDuracion] = useState<number>(() => {
     const guardada = localStorage.getItem("fasttype_duracion_libre");
     if (guardada === null) return DURACION;
@@ -127,19 +124,9 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
   const [transcurrido, setTranscurrido] = useState(0);
   const [iniciado, setIniciado] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const [historial, setHistorial] = useState<{ id: number; wpm: number; precision: number; creado_en: string }[]>([]);
-  const [ranking, setRanking] = useState<{ nombre: string; mejor_wpm: number }[]>([]);
   const guardadoRef = useRef(false);
   const guardadoTeclasRef = useRef(false);
   const confianzaTeclasRef = useRef<Record<string, { etiqueta: string; aciertos: number; intentos: number }>>({});
-
-  useEffect(() => {
-    let activo = true;
-    Promise.all([pedirHistorial(), pedirRanking()])
-      .then(([h, r]) => { if (activo) { setHistorial(h); setRanking(r); } })
-      .catch(() => {});
-    return () => { activo = false; };
-  }, []);
 
   const textoCompleto = escrito.length === texto.length;
   const terminado = (duracion !== 0 && tiempo === 0) || textoCompleto;
@@ -221,10 +208,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
   useEffect(() => {
     if (!terminado || guardadoRef.current || escrito.length === 0) return;
     guardadoRef.current = true;
-    guardarResultado(wpm, precision, segundosUsados)
-      .then(() => Promise.all([pedirHistorial(), pedirRanking()]))
-      .then(([h, r]) => { setHistorial(h); setRanking(r); })
-      .catch(() => {});
+    guardarResultado(wpm, precision, segundosUsados).catch((error) => console.error("No se pudo guardar el resultado:", error));
   }, [terminado, escrito.length, wpm, precision, segundosUsados]);
 
   function guardarConfianzaActual() {
@@ -329,8 +313,8 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
   return (
     <section className="vista-contenido pantalla-entrenamiento prueba-libre" style={estiloEscritura(fuente, tamano)}>
       <div className="vista-cabecera cabecera-prueba-libre">
-        <button className="boton-texto" onClick={() => { guardarConfianzaActual(); onInicio(); }}>← INICIO</button>
-        <span className="usuario-chip">{usuario}</span>
+        <button className="boton-texto" onClick={onLecciones}>LECCIONES</button>
+        <button className="usuario-chip usuario-chip-perfil" onClick={onPerfil} title="Abrir perfil">{usuario}</button>
         <SelectorCategorias categorias={categorias} onChange={onCategoriasChange} />
         <div className="prueba-libre-controles" aria-label="Configuración de la prueba">
         <div className="selector-duracion" role="group" aria-label="Duración">
@@ -371,10 +355,6 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
         <input ref={inputRef} className="input-escritura-invisible" type="text" value={escrito} onChange={manejarCambio} onKeyDown={manejarTecla} onPaste={(e) => e.preventDefault()} disabled={terminado || generandoTexto} autoComplete="off" autoCapitalize="off" spellCheck={false} autoFocus aria-label="Escribe aquí el texto de la prueba libre" />
       </div>
       {terminado && <div className="resultado"><div><strong>{wpm}</strong>WPM</div><div><strong>{precision}%</strong>Precisión</div></div>}
-      <div className="paneles paneles-resultados">
-        <div className="panel"><h3>Tu historial</h3><ul>{historial.slice(0, 5).map((r) => <li key={r.id}>{r.wpm} WPM · {r.precision}% · {new Date(r.creado_en).toLocaleDateString()}</li>)}</ul></div>
-        <div className="panel"><h3>Ranking global</h3><ol>{ranking.map((r) => <li key={r.nombre}>{r.nombre}: {r.mejor_wpm} WPM</li>)}</ol></div>
-      </div>
     </section>
   );
 }
@@ -382,7 +362,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onInicio, fuen
 function App() {
   const [usuario, setUsuario] = useState<string | null>(null);
   const [comprobandoSesion, setComprobandoSesion] = useState(true);
-  const [vista, setVista] = useState<"inicio" | "lecciones" | "libre" | "perfil">("inicio");
+  const [vista, setVista] = useState<"lecciones" | "libre" | "perfil">("libre");
   const [categoriasPractica, setCategoriasPractica] = useState<CategoriaPractica[]>(["letras"]);
   const [fuente, setFuente] = useState<FuenteEscritura>(() => {
     const v = localStorage.getItem("fasttype_fuente");
@@ -421,7 +401,7 @@ function App() {
       console.error("Error cerrando sesión:", error);
     } finally {
       setUsuario(null);
-      setVista("inicio");
+      setVista("libre");
     }
   }
 
@@ -432,21 +412,19 @@ function App() {
   if (!usuario) return <Login onEntrar={setUsuario} />;
   return (
     <div className="app-shell">
-      {vista === "inicio" ? (
-        <Inicio usuario={usuario} onLecciones={() => setVista("lecciones")} onLibre={() => setVista("libre")} onPerfil={() => setVista("perfil")} onSalir={salir} />
-      ) : vista === "lecciones" ? (
+      {vista === "lecciones" ? (
         <section className="vista-contenido pantalla-entrenamiento vista-lecciones">
           <div className="vista-cabecera">
-            <button className="boton-texto" onClick={() => setVista("inicio")}>← INICIO</button>
-            <span className="usuario-chip">{usuario}</span>
+            <button className="boton-texto" onClick={() => setVista("libre")}>PRÁCTICA</button>
+            <button className="usuario-chip usuario-chip-perfil" onClick={() => setVista("perfil")} title="Abrir perfil">{usuario}</button>
             <button className="boton-salir" onClick={salir}>Salir</button>
           </div>
           <Lecciones usuario={usuario} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
         </section>
       ) : vista === "perfil" ? (
-        <Perfil usuario={usuario} onInicio={() => setVista("inicio")} onSalir={salir} />
+        <Perfil usuario={usuario} onInicio={() => setVista("libre")} onLecciones={() => setVista("lecciones")} onSalir={salir} />
       ) : (
-        <Test usuario={usuario} categorias={categoriasPractica} onCategoriasChange={setCategoriasPractica} onSalir={salir} onInicio={() => setVista("inicio")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
+        <Test usuario={usuario} categorias={categoriasPractica} onCategoriasChange={setCategoriasPractica} onSalir={salir} onLecciones={() => setVista("lecciones")} onPerfil={() => setVista("perfil")} fuente={fuente} tamano={tamano} onFuente={cambiarFuente} onTamano={cambiarTamano} />
       )}
     </div>
   );
