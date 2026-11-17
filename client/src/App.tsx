@@ -342,6 +342,7 @@ function Test({ usuario, categorias, onCategoriasChange, onSalir, onLecciones, o
       </div>
       <h1>PRÁCTICA</h1>
       <p className="tiempo">{duracion === 0 ? tiempoVisible : tiempo + "s"}</p>
+      {!terminado && <p className="velocidad-actual">{wpm} <span>PPM</span></p>}
       {generandoTexto && <p className="texto-generando">Preparando ejercicio personalizado…</p>}
       <div className="zona-escritura" onClick={() => inputRef.current?.focus()} role="group" aria-label="Área de escritura. Haz clic aquí y escribe el texto mostrado.">
         <p className="texto texto-flotante" aria-label={texto}>
